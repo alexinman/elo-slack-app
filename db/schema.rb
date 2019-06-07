@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20190607212326) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "games", force: :cascade do |t|
     t.text     "logged_by_user_id", null: false
     t.integer  "player_one_id",     null: false
@@ -31,4 +34,6 @@ ActiveRecord::Schema.define(version: 20190607212326) do
     t.datetime "updated_at",                null: false
   end
 
+  add_foreign_key "games", "players", column: "player_one_id", on_delete: :cascade
+  add_foreign_key "games", "players", column: "player_two_id", on_delete: :cascade
 end
