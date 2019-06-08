@@ -8,7 +8,9 @@ class EloController < ApplicationController
     command, other = params[:text].split
     case command
     when "rating"
-      rating(other)
+      rating
+    when "leaderboard"
+      leaderboard(other)
     else
       game
     end
@@ -20,69 +22,53 @@ class EloController < ApplicationController
     yield
   rescue => e
     puts "#{e.message}\n#{e.backtrace.join("\n")}"
-    render json: {
-        response_type: "ephemeral",
-        text: "Uh oh! Something went wrong. Please contact Alex."
-    }, status: :ok
+    reply "Uh oh! Something went wrong. Please contact Alex."
   end
 
   def help
-    response = {
-        response_type: "ephemeral",
-        text: ":wave: Need some help with `/elo`? Ask Alex."
-    }
-    render json: response, status: :ok
+    reply ":wave: Need some help with `/elo`? Ask Alex."
   end
 
-  def rating(args)
+  def leaderboard(args)
+    game_type, _ = args
+    players = Player.where(team_id: current_team, game_type: game_type).order(rating: :desc).take(10)
+    text = if players.empty?
+             "No one has played any ELO rated games of #{game_type} yet."
+           else
+             players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n")
+           end
+    reply text
+  end
+
+  def rating
     players = Player.where(team_id: current_team, user_id: current_user).to_a
     text = if players.empty?
              "You haven't played any ELO rated games yet."
            else
              players.map { |player| "Your rating in #{player.game_type} is #{player.rating}." }.join("\n")
            end
-    response = {
-        response_type: "ephemeral",
-        text: text
-    }
-    render json: response, status: :ok
+    reply text
   end
 
   def game
     _, p1, p2, game_type = params[:text].match(/^<([^\|]*).*> beat <([^\|]*).*> at ([a-z]*)$/).to_a
     return help if p1.blank? || p2.blank? || game_type.blank?
 
-    if [p1, p2].include? current_user
-      response = {
-          response_type: "ephemeral",
-          text: "A third-party witness must enter the game for it to count."
-      }
-      render json: response, status: :ok and return
-    end
-
-    if ([p1, p2] && %w(@USLACKBOT !channel !here)).present?
-      response = {
-          response_type: "ephemeral",
-          text: ":areyoukiddingme:"
-      }
-      render json: response, status: :ok and return
-    end
-
-    if p1 == p2
-      response = {
-          response_type: "ephemeral",
-          text: "<#{p1}> can't even beat themself at #{game_type} :okay:"
-      }
-      render json: response, status: :ok and return
-    end
+    reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
+    reply ":areyoukiddingme:" and return if ([p1, p2] && %w(@USLACKBOT !channel !here)).present?
+    reply "<#{p1}> can't even beat themself at #{game_type} :okay:" and return if p1 == p2
 
     p1 = Player.where(team_id: current_team, user_id: p1, game_type: game_type).first_or_initialize
     p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
     p1.beats p2, current_user
 
+    reply "Congratulations to <#{p1.user_id}> on beating <#{p2.user_id}> at #{game_type}.", "in_channel"
+  end
+
+  def reply(text, response_type = "ephemeral")
     response = {
-        response_type: "in_channel",
-        text: "Congratulations to <#{p1.user_id}> on beating <#{p2.user_id}> at #{game_type}."
+        response_type: response_type,
+        text: text
     }
     render json: response, status: :ok
   end
