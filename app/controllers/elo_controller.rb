@@ -31,11 +31,16 @@ class EloController < ApplicationController
   end
 
   def help
-    reply ":wave: Need some help with `/elo`? Here are some useful commands:\n" <<
-        "• `/elo [@winner] defeated [@loser] at [game]` where \"[game]\" is a single word (ex. pingpong, not ping pong)\n" <<
-        "• `/elo rating`\n" <<
-        "• `/elo leaderboard [game]`\n" <<
-        "• `/elo help`\n"
+    attachments = [
+      {
+        text:
+          "`/elo [@winner] defeated [@loser] at [game]`\n" <<
+          "`/elo leaderboard [game]`\n" <<
+          "`/elo rating`\n" <<
+          "`/elo help`"
+      }
+    ]
+    reply ":wave: Need some help with `/elo`? Here are some useful commands:", attachments: attachments
   end
 
   def leaderboard(args)
@@ -75,19 +80,20 @@ class EloController < ApplicationController
     case verb
     when *VICTORY_TERMS
       p1.won_against p2, current_user
-      reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", "in_channel"
+      reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", in_channel: true
     when *TIED_TERMS
       p1.tied_with p2, current_user
-      reply "<#{p1.user_id}> :#{win_emoji}: tied <#{p2.user_id}> :#{win_emoji}: at #{game_type}.", "in_channel"
+      reply "<#{p1.user_id}> :#{win_emoji}: tied <#{p2.user_id}> :#{win_emoji}: at #{game_type}.", in_channel: true
     else
       return help
     end
   end
 
-  def reply(text, response_type = "ephemeral")
+  def reply(text, in_channel: false, attachments: [])
     response = {
-        response_type: response_type,
-        text: text
+        response_type: in_channel ? "in_channel" : "ephemeral",
+        text: text,
+        attachments: attachments
     }
     render json: response, status: :ok
   end
