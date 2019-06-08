@@ -1,5 +1,6 @@
 class EloController < ApplicationController
   around_filter :error_handling
+  before_filter :verify_slack_signature
 
   VICTORY_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced',
                    'routed', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed', 'crushed',
@@ -22,6 +23,21 @@ class EloController < ApplicationController
   end
 
   private
+
+  def verify_slack_signature
+    version_number = 'v0' # always v0 for now
+    timestamp = request.headers['X-Slack-Request-Timestamp']
+    raw_body = request.body.read
+    sig_basestring = [version_number, timestamp, raw_body].join(':')
+
+    signing_secret = ENV['SLACK_SIGNING_SECRET'].to_s
+    digest = OpenSSL::Digest::SHA256.new
+    hex_hash = OpenSSL::HMAC.hexdigest(digest, signing_secret, sig_basestring)
+    computed_signature = [version_number, hex_hash].join('=')
+    slack_signature = request.headers['X-Slack-Signature']
+
+    render nothing: true, status: :unauthorized if computed_signature != slack_signature
+  end
 
   def error_handling
     yield
