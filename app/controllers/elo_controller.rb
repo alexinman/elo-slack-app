@@ -31,6 +31,8 @@ class EloController < ApplicationController
 
   def leaderboard(args)
     game_type, _ = args
+    return help unless game_type.present?
+    
     players = Player.where(team_id: current_team, game_type: game_type).order(rating: :desc).take(10)
     text = if players.empty?
              "No one has played any ELO rated games of #{game_type} yet."
