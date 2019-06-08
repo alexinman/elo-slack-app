@@ -51,7 +51,7 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, p2, game_type = params[:text].match(/^<([^\|]*).*> beat <([^\|]*).*> at ([a-z]*)$/).to_a
+    _, p1, p2, game_type = params[:text].match(/^<([^\|]*).*> beat <([^\|]*).*> at ([a-z]*)\.?$/).to_a
     return help if p1.blank? || p2.blank? || game_type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
