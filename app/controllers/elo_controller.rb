@@ -22,7 +22,7 @@ class EloController < ApplicationController
     puts "#{e.message}\n#{e.backtrace.join("\n")}"
     render json: {
         response_type: "ephemeral",
-        text: "Uh oh! Something went wrong. Please try again."
+        text: "Uh oh! Something went wrong. Please contact Alex."
     }, status: :ok
   end
 
@@ -35,7 +35,7 @@ class EloController < ApplicationController
   end
 
   def rating(args)
-    players = Player.where(team_id: params[:team_id], user_id: current_user).to_a
+    players = Player.where(team_id: current_team, user_id: current_user).to_a
     text = if players.empty?
              "You haven't played any ELO rated games yet."
            else
@@ -68,8 +68,8 @@ class EloController < ApplicationController
       render json: response, status: :ok and return
     end
 
-    p1 = Player.where(team_id: params[:team_id], user_id: p1, game_type: game_type).first_or_initialize
-    p2 = Player.where(team_id: params[:team_id], user_id: p2, game_type: game_type).first_or_initialize
+    p1 = Player.where(team_id: current_team, user_id: p1, game_type: game_type).first_or_initialize
+    p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
     p1.beats p2, current_user
 
     response = {
@@ -77,6 +77,10 @@ class EloController < ApplicationController
         text: "Congratulations to <#{p1.user_id}> on beating <#{p2.user_id}> at #{game_type}."
     }
     render json: response, status: :ok
+  end
+
+  def current_team
+    params[:team_id]
   end
 
   def current_user
