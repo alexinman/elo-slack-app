@@ -35,6 +35,7 @@ class EloController < ApplicationController
       {
         text:
           "`/elo [@winner] defeated [@loser] at [game]`\n" <<
+          "`/elo [@player1] tied [@player2] at [game]`\n" <<
           "`/elo leaderboard [game]`\n" <<
           "`/elo rating`\n" <<
           "`/elo help`"
@@ -80,7 +81,7 @@ class EloController < ApplicationController
     case verb
     when *VICTORY_TERMS
       p1.won_against p2, current_user
-      reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", in_channel: true
+      reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on defeating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", in_channel: true
     when *TIED_TERMS
       p1.tied_with p2, current_user
       reply "<#{p1.user_id}> :#{win_emoji}: tied <#{p2.user_id}> :#{win_emoji}: at #{game_type}.", in_channel: true
