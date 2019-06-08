@@ -68,7 +68,7 @@ class EloController < ApplicationController
     p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
     p1.beats p2, current_user
 
-    reply "Congratulations to <#{p1.user_id}> :tada: on beating <#{p2.user_id}> :okay: at #{game_type}!", "in_channel"
+    reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", "in_channel"
   end
 
   def reply(text, response_type = "ephemeral")
@@ -77,6 +77,14 @@ class EloController < ApplicationController
         text: text
     }
     render json: response, status: :ok
+  end
+
+  def win_emoji
+    %w(aaw_yeah awesome awesomesauce awwyeah bananadance carlton cheers clapping congrats dabward dancing_pickle dank datboi deadpool drake excellent fancy fastparrot feelssogood fiestaparrot foleydance gandalf gusta happytony happy_cloud happy_tim heh-heh-heh-hao-owrrrr-rah-heh-heh-heh-heh-huh-huh-haow-hah-haough johncena mat_icon_whatshot nailedit notinmyhouse nyan obama_not_bad parrot party-corgi partywizard party_dino party_frog party_mim_cat party_trash_dove pewpew quag rekt slav_squat spiderman success sunglasses-on-a-baby thanks travis_passed very_nice woohoo yeah yeet yes).sample
+  end
+
+  def lose_emoji
+    %w(angrytony angry_tim backs-away bruh collins crying disappear disappointed_jacob doh doodie drypenguin dumpster_fire facepalm feelsbad flood garbage grumpycat haha leftshark mooning nooooooo numb okay okthen oof patrickboo puddlearm puke raised_eyebrow sadparrot sadpepe sad_mac sad_rowser santa-derp shame somebodykillme surprised_pikachu swear thisstraycatlookslikegrandma travis_failed triggered unimpressed wellthen why wowen wtf yuno).sample
   end
 
   def current_team
