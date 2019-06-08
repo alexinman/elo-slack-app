@@ -60,10 +60,18 @@ class EloController < ApplicationController
       render json: response, status: :ok and return
     end
 
+    if ([p1, p2] && %w(@USLACKBOT !channel !here)).present?
+      response = {
+          response_type: "ephemeral",
+          text: ":areyoukiddingme:"
+      }
+      render json: response, status: :ok and return
+    end
+
     if p1 == p2
       response = {
           response_type: "ephemeral",
-          text: "<#{p1}> can't beat themself at #{game_type}."
+          text: "<#{p1}> can't even beat themself at #{game_type} :okay:"
       }
       render json: response, status: :ok and return
     end
