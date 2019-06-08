@@ -31,7 +31,11 @@ class EloController < ApplicationController
   end
 
   def help
-    reply ":wave: Need some help with `/elo`? Ask Alex."
+    reply ":wave: Need some help with `/elo`? Here are some useful commands:\n" <<
+        "• `/elo [@winner] defeated [@loser] at [game]` where \"[game]\" is a single word (ex. pingpong, not ping pong)\n" <<
+        "• `/elo rating`\n" <<
+        "• `/elo leaderboard [game]`\n" <<
+        "• `/elo help`\n"
   end
 
   def leaderboard(args)
