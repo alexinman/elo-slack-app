@@ -18,7 +18,8 @@ class EloController < ApplicationController
 
   def error_handling
     yield
-  rescue
+  rescue => e
+    puts "#{e.message}\n#{e.backtrace.join("\n")}"
     render json: {
         response_type: "ephemeral",
         text: "Uh oh! Something went wrong. Please try again."
