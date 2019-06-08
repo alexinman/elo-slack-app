@@ -1,6 +1,10 @@
 class EloController < ApplicationController
   around_filter :error_handling
 
+  VICTORY_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced',
+                   'routed', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed', 'crushed',
+                   'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned']
+
   def elo
     render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request if params[:user_id].blank?
@@ -53,8 +57,8 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, p2, game_type = params[:text].match(/^<([^\|]*).*> beat <([^\|]*).*> at ([a-z]*)\.?$/).to_a
-    return help if p1.blank? || p2.blank? || game_type.blank?
+    _, p1, verb, p2, game_type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at ([a-z]*)\.?$/).to_a
+    return help if p1.blank? || p2.blank? || game_type.blank? || VICTORY_TERMS.exclude?(verb)
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
     reply ":areyoukiddingme:" and return if ([p1, p2] & %w(@USLACKBOT !channel !here)).present?
