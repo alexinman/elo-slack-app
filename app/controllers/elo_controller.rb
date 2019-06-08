@@ -52,6 +52,22 @@ class EloController < ApplicationController
     _, p1, p2, game_type = params[:text].match(/^<([^\|]*).*> beat <([^\|]*).*> at ([a-z]*)$/).to_a
     return help if p1.blank? || p2.blank? || game_type.blank?
 
+    if [p1, p2].include? current_user
+      response = {
+          response_type: "ephemeral",
+          text: "A third-party witness must enter the game for it to count."
+      }
+      render json: response, status: :ok and return
+    end
+
+    if p1 == p2
+      response = {
+          response_type: "ephemeral",
+          text: "<#{p1}> can't beat themself at #{game_type}."
+      }
+      render json: response, status: :ok and return
+    end
+
     p1 = Player.where(team_id: params[:team_id], user_id: p1, game_type: game_type).first_or_initialize
     p2 = Player.where(team_id: params[:team_id], user_id: p2, game_type: game_type).first_or_initialize
     p1.beats p2, current_user
