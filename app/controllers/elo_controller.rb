@@ -55,7 +55,7 @@ class EloController < ApplicationController
     return help if p1.blank? || p2.blank? || game_type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
-    reply ":areyoukiddingme:" and return if ([p1, p2] && %w(@USLACKBOT !channel !here)).present?
+    reply ":areyoukiddingme:" and return if ([p1, p2] & %w(@USLACKBOT !channel !here)).present?
     reply "<#{p1}> can't even beat themself at #{game_type} :okay:" and return if p1 == p2
 
     p1 = Player.where(team_id: current_team, user_id: p1, game_type: game_type).first_or_initialize
