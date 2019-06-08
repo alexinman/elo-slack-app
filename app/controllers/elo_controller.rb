@@ -22,7 +22,7 @@ class EloController < ApplicationController
     yield
   rescue => e
     puts "#{e.message}\n#{e.backtrace.join("\n")}"
-    reply "Uh oh! Something went wrong. Please contact Alex."
+    reply "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"
   end
 
   def help
@@ -32,7 +32,7 @@ class EloController < ApplicationController
   def leaderboard(args)
     game_type, _ = args
     return help unless game_type.present?
-    
+
     players = Player.where(team_id: current_team, game_type: game_type).order(rating: :desc).take(10)
     text = if players.empty?
              "No one has played any ELO rated games of #{game_type} yet."
@@ -64,7 +64,7 @@ class EloController < ApplicationController
     p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
     p1.beats p2, current_user
 
-    reply "Congratulations to <#{p1.user_id}> on beating <#{p2.user_id}> at #{game_type}.", "in_channel"
+    reply "Congratulations to <#{p1.user_id}> :tada: on beating <#{p2.user_id}> :okay: at #{game_type}!", "in_channel"
   end
 
   def reply(text, response_type = "ephemeral")
