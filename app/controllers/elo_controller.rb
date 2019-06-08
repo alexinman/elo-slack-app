@@ -4,6 +4,7 @@ class EloController < ApplicationController
   VICTORY_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced',
                    'routed', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed', 'crushed',
                    'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned']
+  TIED_TERMS = ['tied', 'drawed']
 
   def elo
     render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
@@ -58,17 +59,25 @@ class EloController < ApplicationController
 
   def game
     _, p1, verb, p2, game_type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at ([a-z]*)\.?$/).to_a
-    return help if p1.blank? || p2.blank? || game_type.blank? || VICTORY_TERMS.exclude?(verb)
+    return help if p1.blank? || p2.blank? || game_type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
     reply ":areyoukiddingme:" and return if ([p1, p2] & %w(@USLACKBOT !channel !here)).present?
-    reply "<#{p1}> can't even beat themself at #{game_type} :okay:" and return if p1 == p2
+    reply "<#{p1}> can't even beat themself at #{game_type} :#{lose_emoji}:" and return if p1 == p2
 
     p1 = Player.where(team_id: current_team, user_id: p1, game_type: game_type).first_or_initialize
     p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
-    p1.beats p2, current_user
 
-    reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", "in_channel"
+    case verb
+    when *VICTORY_TERMS
+      p1.won_against p2, current_user
+      reply "Congratulations to <#{p1.user_id}> :#{win_emoji}: on beating <#{p2.user_id}> :#{lose_emoji}: at #{game_type}!", "in_channel"
+    when *TIED_TERMS
+      p1.tied_with p2, current_user
+      reply "<#{p1.user_id}> :#{win_emoji}: tied <#{p2.user_id}> :#{win_emoji}: at #{game_type}.", "in_channel"
+    else
+      return help
+    end
   end
 
   def reply(text, response_type = "ephemeral")

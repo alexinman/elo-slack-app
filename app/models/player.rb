@@ -1,8 +1,4 @@
 class Player < ActiveRecord::Base
-  after_initialize :init_elo_player
-
-  attr_reader :elo_player
-
   def games
     return @games unless @games.nil?
     return [] unless self.id.present?
@@ -11,20 +7,28 @@ class Player < ActiveRecord::Base
     @games = Game.where(player_one.or(player_two))
   end
 
-  def beats(other_player, logged_by_user_id)
+  def won_against(other_player, logged_by_user_id)
+    log_game(other_player, logged_by_user_id, :wins_from)
+  end
+
+  def tied_with(other_player, logged_by_user_id)
+    log_game(other_player, logged_by_user_id, :plays_draw)
+  end
+
+  def elo_player
+    @elo_player ||= Elo::Player.new(rating: rating, games_played: games.count)
+  end
+
+  private
+
+  def log_game(other_player, logged_by_user_id, result)
     transaction do
-      elo_game = elo_player.wins_from(other_player.elo_player)
+      elo_game = elo_player.send(result, other_player.elo_player)
       Game.create!(logged_by_user_id: logged_by_user_id, player_one: self, player_two: other_player, result: elo_game.result)
       @games = nil
       self.rating = elo_player.rating
       other_player.rating = other_player.elo_player.rating
       other_player.save! && save!
     end
-  end
-
-  private
-
-  def init_elo_player
-    @elo_player = Elo::Player.new(rating: rating, games_played: games.count)
   end
 end
