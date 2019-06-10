@@ -11,7 +11,7 @@ class EloController < ApplicationController
     render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request if params[:user_id].blank?
     return help if params[:text].empty? || params[:text] == "help"
-    command, other = params[:text].split
+    command, _, other = params[:text].partition(" ")
     case command
     when "rating"
       rating
@@ -66,8 +66,7 @@ class EloController < ApplicationController
     reply ":wave: Need some help with `/elo`? Here are some useful commands:", attachments: attachments
   end
 
-  def leaderboard(args)
-    type = Array.wrap(args).join(" ")
+  def leaderboard(type)
     return help unless type.present?
 
     game_type = find_game_type(type)
@@ -99,8 +98,7 @@ class EloController < ApplicationController
     reply text
   end
 
-  def register(args)
-    type = Array.wrap(args).join(" ")
+  def register(type)
     return help unless type.present?
 
     game_type = GameType.where(team_id: current_team, game_type: type).take
@@ -121,7 +119,7 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, verb, p2, type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at (.*)\.?$/).to_a
+    _, p1, verb, p2, type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at (.*)$/).to_a
     return help if p1.blank? || p2.blank? || type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
