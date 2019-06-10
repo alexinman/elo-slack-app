@@ -158,7 +158,7 @@ class EloController < ApplicationController
         text: text,
         attachments: attachments
     }
-    render json: response, status: :ok
+    render json: response, status: :ok and return nil
   end
 
   def win_emoji
