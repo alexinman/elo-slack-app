@@ -1,4 +1,6 @@
 class Player < ActiveRecord::Base
+  belongs_to :game_type
+
   def games
     return @games unless @games.nil?
     return [] unless self.id.present?
@@ -22,6 +24,7 @@ class Player < ActiveRecord::Base
   private
 
   def log_game(other_player, logged_by_user_id, result)
+    raise ArgumentError, 'other_player is for different game_type' unless self.game_type_id == other_player.game_type_id
     transaction do
       elo_game = elo_player.send(result, other_player.elo_player)
       Game.create!(logged_by_user_id: logged_by_user_id, player_one: self, player_two: other_player, result: elo_game.result)

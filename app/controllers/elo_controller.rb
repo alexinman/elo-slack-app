@@ -17,6 +17,10 @@ class EloController < ApplicationController
       rating
     when "leaderboard"
       leaderboard(other)
+    when "register"
+      register(other)
+    when "games"
+      games
     else
       game
     end
@@ -50,23 +54,28 @@ class EloController < ApplicationController
     attachments = [
       {
         text:
-          "`/elo [@winner] defeated [@loser] at [game]`\n" <<
-          "`/elo [@player1] tied [@player2] at [game]`\n" <<
-          "`/elo leaderboard [game]`\n" <<
-          "`/elo rating`\n" <<
-          "`/elo help`"
+          "`/elo [@winner] defeated [@loser] at [game]` - Logs a game between these players and updates their ratings accordingly.\n" <<
+          "`/elo [@player1] tied [@player2] at [game]` - Logs a tie game between these players and updates their ratings accordingly.\n" <<
+          "`/elo leaderboard [game]` - Displays the leaderboard for the specified game.\n" <<
+          "`/elo rating` - Displays your Elo rating for all types of games you've played.\n" <<
+          "`/elo games` - Lists all registered games for this team. (a.k.a. Valid inputs for [game] in other commands).\n" <<
+          "`/elo register [game]` - Registers this as a type of game that this team plays.\n" <<
+          "`/elo help` - Shows this message."
       }
     ]
     reply ":wave: Need some help with `/elo`? Here are some useful commands:", attachments: attachments
   end
 
   def leaderboard(args)
-    game_type, _ = args
-    return help unless game_type.present?
+    type = Array.wrap(args).join(" ")
+    return help unless type.present?
 
-    players = Player.where(team_id: current_team, game_type: game_type).order(rating: :desc).take(10)
+    game_type = find_game_type(type)
+    return unless game_type
+
+    players = Player.where(team_id: current_team, game_type_id: game_type.id).order(rating: :desc).take(10)
     text = if players.empty?
-             "No one has played any ELO rated games of #{game_type} yet."
+             "No one has played any ELO rated games of #{type} yet."
            else
              players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n")
            end
@@ -74,25 +83,49 @@ class EloController < ApplicationController
   end
 
   def rating
-    players = Player.where(team_id: current_team, user_id: current_user).to_a
+    players = Player.where(team_id: current_team, user_id: current_user).includes(:game_type).to_a
     text = if players.empty?
              "You haven't played any ELO rated games yet."
            else
-             players.map { |player| "Your rating in #{player.game_type} is #{player.rating}." }.join("\n")
+             players.map { |player| "Your rating in #{player.game_type.game_type} is #{player.rating}." }.join("\n")
+           end
+    reply text
+  end
+
+  def register(args)
+    type = Array.wrap(args).join(" ")
+    return help unless type.present?
+
+    game_type = GameType.where(team_id: current_team, game_type: type).take
+    reply "That game has already been registered." if game_type.present?
+
+    game_type = GameType.create!(team_id: current_team, game_type: type)
+    reply "Successfully registered #{game_type.game_type} for this team!"
+  end
+
+  def games
+    game_types = GameType.where(team_id: current_team).to_a
+    text = if game_types.empty?
+             "No types of games have been registered for this team yet. Try `/elo register [game]`."
+           else
+             "Here are all the registered types of games for this team:\n#{game_types.map { |game_type| "• #{game_type.game_type}" }.join("\n")}"
            end
     reply text
   end
 
   def game
-    _, p1, verb, p2, game_type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at ([a-z]*)\.?$/).to_a
-    return help if p1.blank? || p2.blank? || game_type.blank?
+    _, p1, verb, p2, type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at ([a-z ]*)\.?$/).to_a
+    return help if p1.blank? || p2.blank? || type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
     reply ":areyoukiddingme:" and return if ([p1, p2] & %w(@USLACKBOT !channel !here)).present?
-    reply "<#{p1}> can't even beat themself at #{game_type} :#{lose_emoji}:" and return if p1 == p2
+    reply "<#{p1}> can't even beat themself at #{type} :#{lose_emoji}:" and return if p1 == p2
 
-    p1 = Player.where(team_id: current_team, user_id: p1, game_type: game_type).first_or_initialize
-    p2 = Player.where(team_id: current_team, user_id: p2, game_type: game_type).first_or_initialize
+    game_type = find_game_type(type)
+    return unless game_type
+
+    p1 = Player.where(team_id: current_team, user_id: p1, game_type_id: game_type.id).first_or_initialize
+    p2 = Player.where(team_id: current_team, user_id: p2, game_type_id: game_type.id).first_or_initialize
 
     case verb
     when *VICTORY_TERMS
@@ -104,6 +137,19 @@ class EloController < ApplicationController
     else
       return help
     end
+  end
+
+  def find_game_type(type)
+    game_type = GameType.where(team_id: current_team, game_type: type).take
+    return game_type unless game_type.nil?
+    attachments = [
+      {
+        text:
+          "`/elo games` - Lists all registered games for this team. (a.k.a. Valid inputs for [game] in other commands).\n" <<
+          "`/elo register [game]` - Registers this as a type of game that this team plays."
+      }
+    ]
+    reply "The game of #{type} has not be registered for this team yet. Try using one of the following commands to find or register the game you're looking for.", attachments: attachments
   end
 
   def reply(text, in_channel: false, attachments: [])

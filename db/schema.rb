@@ -11,10 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190607212326) do
+ActiveRecord::Schema.define(version: 20190610130652) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "game_types", force: :cascade do |t|
+    t.text     "team_id",    null: false
+    t.text     "game_type",  null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "games", force: :cascade do |t|
     t.text     "logged_by_user_id", null: false
@@ -26,14 +33,15 @@ ActiveRecord::Schema.define(version: 20190607212326) do
   end
 
   create_table "players", force: :cascade do |t|
-    t.text     "team_id",                   null: false
-    t.text     "user_id",                   null: false
-    t.text     "game_type",                 null: false
-    t.integer  "rating",     default: 1000, null: false
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+    t.text     "team_id",                     null: false
+    t.text     "user_id",                     null: false
+    t.integer  "rating",       default: 1000, null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.integer  "game_type_id",                null: false
   end
 
   add_foreign_key "games", "players", column: "player_one_id", on_delete: :cascade
   add_foreign_key "games", "players", column: "player_two_id", on_delete: :cascade
+  add_foreign_key "players", "game_types", on_delete: :cascade
 end
