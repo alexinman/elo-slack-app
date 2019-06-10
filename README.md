@@ -2,6 +2,8 @@
 
 A simple slack app that you can use to add a `/elo` command for your Slack team. Once added, `/elo` allows your team members to log games against each other for different types of games (ex. pingpong, foosball, etc) and have this app automatically keep track of everyone's Elo rating for each of the games. Provides the functionality to view your Elo rating or even see the leaderboards.
 
+More information about the Elo rating system can be found here: https://en.wikipedia.org/wiki/Elo_rating_system
+
 Commands:
  * `/elo [@winner] defeated [@loser] at [game]` logs a game for each player with `@winner` as the winner and changes both players Elo ratings accordingly.
  * `/elo [@player1] tied [@player2] at [game]` logs a tie game for each player and changes both players Elo ratings accordingly.
