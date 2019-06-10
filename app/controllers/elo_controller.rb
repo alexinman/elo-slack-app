@@ -81,7 +81,7 @@ class EloController < ApplicationController
       text = "Here is the current leaderboard for #{type}:"
       attachments = [
           {
-              type: players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n"),
+              text: players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n"),
               footer: "Accurate as of #{Time.now.strftime('%B %d, %Y %l:%M%P %Z')}"
           }
       ]
