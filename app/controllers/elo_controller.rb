@@ -74,12 +74,19 @@ class EloController < ApplicationController
     return unless game_type
 
     players = Player.where(team_id: current_team, game_type_id: game_type.id).order(rating: :desc).take(10)
-    text = if players.empty?
-             "No one has played any ELO rated games of #{type} yet."
-           else
-             players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n")
-           end
-    reply text
+    if players.empty?
+      text = "No one has played any ELO rated games of #{type} yet."
+      attachments = []
+    else
+      text = "Here is the current leaderboard for #{type}:"
+      attachments = [
+          {
+              type: players.each_with_index.map { |player, index| "#{index + 1}. <#{player.user_id}> (#{player.rating})" }.join("\n"),
+              footer: "Accurate as of #{Time.now.strftime('%B %d, %Y %l:%M%P %Z')}"
+          }
+      ]
+    end
+    reply text, attachments: attachments
   end
 
   def rating
@@ -114,7 +121,7 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, verb, p2, type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at ([a-z ]*)\.?$/).to_a
+    _, p1, verb, p2, type = params[:text].match(/^<([^\|]*).*> ([a-z ]*) <([^\|]*).*> at (.*)\.?$/).to_a
     return help if p1.blank? || p2.blank? || type.blank?
 
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2].include? current_user
