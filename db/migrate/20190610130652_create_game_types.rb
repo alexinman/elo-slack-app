@@ -11,7 +11,7 @@ class CreateGameTypes < ActiveRecord::Migration
     add_foreign_key :players, :game_types, on_delete: :cascade
 
     Player.find_each do |player|
-      game_type = GameType.where(team_id: player.team_id, game_type: player.game_type).first_or_initialize
+      game_type = GameType.where(team_id: player.team_id, game_type: player.attributes['game_type']).first_or_initialize
       game_type.save unless game_type.persisted?
       player.update_column(:game_type_id, game_type.id)
     end
