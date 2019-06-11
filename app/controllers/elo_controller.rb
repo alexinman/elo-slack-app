@@ -48,7 +48,9 @@ class EloController < ApplicationController
   end
 
   def error_handling
-    yield
+    ActiveRecord::Base.transaction do
+      yield
+    end
   rescue => e
     Rails.logger.error "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
     reply "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:", error: true
