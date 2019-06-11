@@ -21,6 +21,14 @@ class Player < ActiveRecord::Base
     @elo_player ||= Elo::Player.new(rating: rating, games_played: games.count)
   end
 
+  def team_tag
+    user_id.split("-").map { |id| "<#{id}>" }.join(" and ")
+  end
+
+  def doubles?
+    team_size == 2
+  end
+
   private
 
   def log_game(other_player, logged_by_user_id, result)
