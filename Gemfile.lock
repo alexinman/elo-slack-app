@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/wakeless/elo.git
+  revision: c67559efbd39a67c0f9667dea9cbf3d3e3d8b6dd
+  branch: equal-change
+  specs:
+    elo (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -50,7 +57,6 @@ GEM
     concurrent-ruby (1.1.5)
     crass (1.0.4)
     debug_inspector (0.0.3)
-    elo (0.1.0)
     erubis (2.7.0)
     execjs (2.7.0)
     ffi (1.11.1)
@@ -153,7 +159,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   coffee-rails (~> 4.1.0)
-  elo
+  elo!
   jbuilder (~> 2.0)
   jquery-rails
   pg (= 0.15)
