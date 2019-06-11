@@ -132,7 +132,7 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: *and *#{SLACK_ID_REGEX})? *([a-z ]*) *#{SLACK_ID_REGEX}(?: *and *#{SLACK_ID_REGEX})? *at *(.*)$/).to_a
+    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: and #{SLACK_ID_REGEX})? ([a-z ]*) #{SLACK_ID_REGEX}(?: and #{SLACK_ID_REGEX})? at (.*)$/).to_a
     return help if p1.blank? || p3.blank? || type.blank?
 
     reply "2 on 1 isn't very fair :dusty_stick:" and return if [p2, p4].compact.count == 1
