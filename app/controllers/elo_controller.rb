@@ -26,11 +26,13 @@ class EloController < ApplicationController
     else
       game
     end
+    render json: @response, status: :ok
   end
 
   private
 
   def verify_slack_signature
+    return if ENV['SKIP_SLACK_SIGNING'] # for easier dev debugging
     version_number = 'v0' # always v0 for now
     timestamp = request.headers['X-Slack-Request-Timestamp']
     raw_body = request.body.read
@@ -49,7 +51,8 @@ class EloController < ApplicationController
     yield
   rescue => e
     Rails.logger.error "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
-    reply "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"
+    reply "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:", error: true
+    render json: @response, status: :ok
   end
 
   def help
@@ -134,7 +137,7 @@ class EloController < ApplicationController
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2, p3, p4].include? current_user
     reply ":areyoukiddingme:" and return if ([p1, p2, p3, p4].compact & %w(@USLACKBOT !channel !here)).present?
     team_size = p2.present? && p4.present? ? 2 : 1
-    reply "Am I seeing double or did you enter the same person twice? :twinsparrot:" and return if [p1, p2, p3, p4].compact.uniq.count != team_size * 2
+    reply "Am I seeing double or did you enter the same person multiple times? :twinsparrot:" and return if [p1, p2, p3, p4].compact.uniq.count != team_size * 2
 
     game_type = find_game_type(type)
     return unless game_type
@@ -145,7 +148,7 @@ class EloController < ApplicationController
     case verb
     when *VICTORY_TERMS
       team1.won_against team2, current_user
-      reply "Congratulations to #{team1.team_tag} :#{win_emoji}: on defeating #{team2.team_tag} :#{lose_emoji}: at #{type}!", in_channel: true
+      reply "Congratulations to #{team1.team_tag} :#{win_emoji}: on defeating #{team2.team_tag} :#{lose_emoji(team2.team_tag)}: at #{type}!", in_channel: true
     when *TIED_TERMS
       team1.tied_with team2, current_user
       reply "#{team1.team_tag} :#{win_emoji}: tied #{team2.team_tag} :#{win_emoji}: at #{type}.", in_channel: true
@@ -165,22 +168,24 @@ class EloController < ApplicationController
         }
     ]
     reply "The game of #{type} has not be registered for this team yet. Try using one of the following commands to find or register the game you're looking for.", attachments: attachments
+    return nil
   end
 
-  def reply(text, in_channel: false, attachments: [])
-    response = {
+  def reply(text, in_channel: false, attachments: [], error: false)
+    raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present? && !error
+    @response = {
         response_type: in_channel ? "in_channel" : "ephemeral",
         text: text,
         attachments: attachments
     }
-    render json: response, status: :ok and return nil
   end
 
-  def win_emoji
+  def win_emoji()
     %w(aaw_yeah awesome awesomesauce awwyeah bananadance carlton cheers clapping congrats dabward dancing_pickle dank datboi deadpool drake excellent fancy fastparrot feelssogood fiestaparrot foleydance gandalf gusta happytony happy_cloud happy_tim heh-heh-heh-hao-owrrrr-rah-heh-heh-heh-heh-huh-huh-haow-hah-haough johncena mat_icon_whatshot nailedit notinmyhouse nyan obama_not_bad parrot party-corgi partywizard party_dino party_frog party_mim_cat party_trash_dove pewpew quag rekt slav_squat spiderman success sunglasses-on-a-baby thanks travis_passed very_nice woohoo yeah yeet yes).sample
   end
 
-  def lose_emoji
+  def lose_emoji(team)
+    return 'shame' if team.include?('@UBK70UVP1')
     %w(angrytony angry_tim backs-away bruh collins crying disappear disappointed_jacob doh doodie drypenguin dumpster_fire facepalm feelsbad flood garbage grumpycat haha leftshark mooning nooooooo numb okay okthen oof patrickboo puddlearm puke raised_eyebrow sadparrot sadpepe sad_mac sad_rowser santa-derp shame somebodykillme surprised_pikachu swear thisstraycatlookslikegrandma travis_failed triggered unimpressed wellthen why wowen wtf yuno).sample
   end
 
