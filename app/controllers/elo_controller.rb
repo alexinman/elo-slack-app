@@ -113,7 +113,7 @@ class EloController < ApplicationController
     return help unless type.present?
 
     game_type = GameType.where(team_id: current_team, game_type: type).take
-    reply "That game has already been registered." if game_type.present?
+    reply "That game has already been registered." and return if game_type.present?
 
     game_type = GameType.create!(team_id: current_team, game_type: type)
     reply "Successfully registered #{game_type.game_type} for this team!"
