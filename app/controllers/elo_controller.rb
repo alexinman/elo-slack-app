@@ -3,8 +3,8 @@ class EloController < ApplicationController
   before_filter :verify_slack_signature
 
   VICTORY_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced',
-                   'routed', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed', 'crushed',
-                   'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned', 'wrecked']
+                   'routed', 'obliterated', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed',
+                   'crushed', 'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned', 'wrecked']
   TIED_TERMS = ['tied', 'drawed']
 
   SLACK_ID_REGEX = '<([^\|>]*)[^>]*>'
