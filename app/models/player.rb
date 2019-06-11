@@ -1,6 +1,8 @@
 class Player < ActiveRecord::Base
   belongs_to :game_type
 
+  after_initialize :store_current_rating
+
   def games
     return @games unless @games.nil?
     return [] unless self.id.present?
@@ -29,7 +31,15 @@ class Player < ActiveRecord::Base
     team_size == 2
   end
 
+  def rating_change
+    sprintf("%+d", self.rating - @rating_before)
+  end
+
   private
+
+  def store_current_rating
+    @rating_before = self.rating
+  end
 
   def log_game(other_player, logged_by_user_id, result)
     raise ArgumentError, 'other_player is for different game_type' unless self.game_type_id == other_player.game_type_id

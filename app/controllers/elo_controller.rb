@@ -148,10 +148,10 @@ class EloController < ApplicationController
     case verb
     when *VICTORY_TERMS
       team1.won_against team2, current_user
-      reply "Congratulations to #{team1.team_tag} :#{win_emoji}: on defeating #{team2.team_tag} :#{lose_emoji(team2.team_tag)}: at #{type}!", in_channel: true
+      reply "Congratulations to #{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: on defeating #{team2.team_tag} (#{team2.rating_change}) :#{lose_emoji(team2.team_tag)}: at #{type}!", in_channel: true
     when *TIED_TERMS
       team1.tied_with team2, current_user
-      reply "#{team1.team_tag} :#{win_emoji}: tied #{team2.team_tag} :#{win_emoji}: at #{type}.", in_channel: true
+      reply "#{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: tied #{team2.team_tag} (#{team2.rating_change}) :#{win_emoji}: at #{type}.", in_channel: true
     else
       return help
     end
