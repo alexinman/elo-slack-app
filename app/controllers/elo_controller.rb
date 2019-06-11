@@ -147,7 +147,7 @@ class EloController < ApplicationController
     team1 = Player.where(team_id: current_team, user_id: [p1, p2].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
     team2 = Player.where(team_id: current_team, user_id: [p3, p4].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
 
-    case verb
+    case verb.strip
     when *VICTORY_TERMS
       team1.won_against team2, current_user
       reply "Congratulations to #{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: on defeating #{team2.team_tag} (#{team2.rating_change}) :#{lose_emoji(team2.team_tag)}: at #{type}!", in_channel: true
