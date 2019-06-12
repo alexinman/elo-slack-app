@@ -124,7 +124,7 @@ class EloController < ApplicationController
               short: true
           },
           {
-              title: "Loses",
+              title: "Losses",
               value: player.number_of_loses,
               short: true
           },
