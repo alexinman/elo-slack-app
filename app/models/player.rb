@@ -35,6 +35,28 @@ class Player < ActiveRecord::Base
     sprintf("%+d", self.rating - @rating_before)
   end
 
+  def number_of_wins
+    player_one = Game.arel_table[:player_one_id].eq(self.id)
+    player_two = Game.arel_table[:player_two_id].eq(self.id)
+    player_one_wins = player_one.and(Game.arel_table[:result].eq(1))
+    player_two_wins = player_two.and(Game.arel_table[:result].eq(0))
+    Game.where(player_one_wins.or(player_two_wins)).count
+  end
+
+  def number_of_loses
+    player_one = Game.arel_table[:player_one_id].eq(self.id)
+    player_two = Game.arel_table[:player_two_id].eq(self.id)
+    player_one_loses = player_one.and(Game.arel_table[:result].eq(0))
+    player_two_loses = player_two.and(Game.arel_table[:result].eq(1))
+    Game.where(player_one_loses.or(player_two_loses)).count
+  end
+
+  def number_of_ties
+    player_one = Game.arel_table[:player_one_id].eq(self.id)
+    player_two = Game.arel_table[:player_two_id].eq(self.id)
+    Game.where(player_one.or(player_two)).where(result: 0.5).count
+  end
+
   private
 
   def store_current_rating

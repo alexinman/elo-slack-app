@@ -17,8 +17,8 @@ class EloController < ApplicationController
     return help if params[:text].empty? || params[:text] == "help"
     command, _, other = params[:text].partition(" ")
     case command
-    when "rating"
-      rating
+    when "rating", "ranking", "stats"
+      stats(other)
     when "leaderboard"
       leaderboard(other)
     when "register"
@@ -83,7 +83,6 @@ class EloController < ApplicationController
 
     singles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 1).order(rating: :desc).take(10)
     doubles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 2).order(rating: :desc).take(10)
-    ts = Time.now.to_i
     attachments = []
 
     reply "No one has played any ELO rated games of #{type} yet." and return if singles.empty? && doubles.empty?
@@ -92,7 +91,7 @@ class EloController < ApplicationController
     if singles.present?
       attachments << {
           text: singles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          footer_icon: image_url('baseline_person_black_18dp.png'),
+          footer_icon: singles_image_url,
           footer: "Singles",
           ts: ts
       }
@@ -100,7 +99,7 @@ class EloController < ApplicationController
     if doubles.present?
       attachments << {
           text: doubles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          footer_icon: image_url('baseline_people_black_18dp.png'),
+          footer_icon: doubles_image_url,
           footer: "Doubles",
           ts: ts
       }
@@ -108,14 +107,45 @@ class EloController < ApplicationController
     reply text, attachments: attachments
   end
 
-  def rating
-    players = Player.where(team_id: current_team).where("user_id like ?", "%#{current_user}%").includes(:game_type).to_a
-    text = if players.empty?
-             "You haven't played any ELO rated games yet."
-           else
-             players.map { |player| "Your rating in #{player.game_type.game_type} #{player.doubles? ? ":mat_icon_people:" : ":mat_icon_person:"} is #{player.rating}." }.join("\n")
-           end
-    reply text
+  def stats(args)
+    _, user_id = args.match(SLACK_ID_REGEX).to_a
+    user_id ||= current_user
+    players = Player.where(team_id: current_team).where("user_id like ?", "%#{user_id}%").includes(:game_type).take(20)
+    reply "You haven't played any ELO rated games yet." and return if players.empty?
+    attachments = players.map do |player|
+      games = player.games.includes(:player_one, :player_two).order(:created_at).last(5)
+      {
+        title: player.team_tag,
+        fallback: "Elo rating: #{player.rating}",
+        text: "Elo rating: #{player.rating}",
+        fields: [
+            {
+                title: "Wins",
+                value: player.number_of_wins,
+                short: true
+            },
+            {
+                title: "Loses",
+                value: player.number_of_loses,
+                short: true
+            },
+            {
+                title: "Ties",
+                value: player.number_of_ties,
+                short: true
+            },
+            {
+                title: "Games",
+                value: games.map { |game| "#{game.player_one.team_tag} beat #{game.player_two.team_tag} (<!date^#{game.created_at.to_i}^{date_short_pretty} at {time}|#{game.created_at.strftime('%b %d, %Y at %l:%M%p %Z')}>)" }.join("\n"),
+                short: false
+            }
+        ],
+        footer: player.game_type.game_type.titleize,
+        footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
+        ts: ts
+      }
+    end
+    reply "", attachments: attachments
   end
 
   def register(type)
@@ -204,5 +234,17 @@ class EloController < ApplicationController
 
   def current_user
     "@#{params[:user_id]}"
+  end
+
+  def ts
+    @ts ||= Time.now.to_i
+  end
+
+  def singles_image_url
+    image_url('baseline_person_black_18dp.png')
+  end
+
+  def doubles_image_url
+    image_url('baseline_people_black_18dp.png')
   end
 end
