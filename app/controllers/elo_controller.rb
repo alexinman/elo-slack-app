@@ -108,9 +108,11 @@ class EloController < ApplicationController
   end
 
   def stats(args)
-    _, user_id = args.match(SLACK_ID_REGEX).to_a
+    _, user_id, type = args.match(/^#{SLACK_ID_REGEX} *(.*)$/).to_a
     user_id ||= current_user
-    players = Player.where(team_id: current_team).where("user_id like ?", "%#{user_id}%").includes(:game_type).take(20)
+    players_rel = Player.where(team_id: current_team).where("user_id like ?", "%#{user_id}%").includes(:game_type)
+    players_rel = players_rel.where(game_type: type) if type.present?
+    players = players_rel.take(20)
     reply "You haven't played any ELO rated games yet." and return if players.empty?
     attachments = players.map do |player|
       games = player.games.includes(:player_one, :player_two).order(:created_at).last(5).reverse
