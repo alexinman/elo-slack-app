@@ -90,7 +90,7 @@ class EloController < ApplicationController
     if singles.present?
       attachments << {
           text: singles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          # footer_icon: view_context.asset_path('baseline_person_black_18dp.png'),
+          footer_icon: view_context.asset_path('baseline_person_black_18dp.png'),
           footer: "Singles",
           ts: ts
       }
@@ -98,7 +98,7 @@ class EloController < ApplicationController
     if doubles.present?
       attachments << {
           text: doubles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          # footer_icon: view_context.asset_path('baseline_people_black_18dp.png'),
+          footer_icon: view_context.asset_path('baseline_people_black_18dp.png'),
           footer: "Doubles",
           ts: ts
       }
