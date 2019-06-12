@@ -112,7 +112,7 @@ class EloController < ApplicationController
     type = args.gsub(/#{SLACK_ID_REGEX}/, '').strip
     user_id ||= current_user
     players_rel = Player.where(team_id: current_team).where("user_id like ?", "%#{user_id}%").includes(:game_type)
-    players_rel = players_rel.where(game_type: type) if type.present?
+    players_rel = players_rel.joins(:game_type).where(game_types: {game_type: type}) if type.present?
     players = players_rel.take(20)
     reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "for #{type}" : ""} yet." and return if players.empty?
     attachments = players.map do |player|
