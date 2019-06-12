@@ -14,7 +14,6 @@ class EloController < ApplicationController
   def elo
     render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request if params[:user_id].blank?
-    return help if params[:text].empty? || params[:text] == "help"
     command, _, other = params[:text].partition(" ")
     case command
     when "rating", "ranking", "stats"
@@ -25,6 +24,8 @@ class EloController < ApplicationController
       register(other)
     when "games"
       games
+    when "help"
+      help
     else
       game
     end
