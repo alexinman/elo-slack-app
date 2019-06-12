@@ -81,6 +81,7 @@ class EloController < ApplicationController
 
     singles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 1).order(rating: :desc).take(10)
     doubles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 2).order(rating: :desc).take(10)
+    ts = Time.now.to_i
     attachments = []
 
     reply "No one has played any ELO rated games of #{type} yet." and return if singles.empty? && doubles.empty?
@@ -89,13 +90,17 @@ class EloController < ApplicationController
     if singles.present?
       attachments << {
           text: singles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          footer: ":mat_icon_person: | Accurate as of #{Time.now.strftime('%B %d, %Y %l:%M%P %Z')}"
+          # footer_icon: view_context.asset_path('baseline_person_black_18dp.png'),
+          footer: "Singles",
+          ts: ts
       }
     end
     if doubles.present?
       attachments << {
           text: doubles.each_with_index.map { |player, index| "#{index + 1}. #{player.team_tag} (#{player.rating})" }.join("\n"),
-          footer: ":mat_icon_people: | Accurate as of #{Time.now.strftime('%B %d, %Y %l:%M%P %Z')}"
+          # footer_icon: view_context.asset_path('baseline_people_black_18dp.png'),
+          footer: "Doubles",
+          ts: ts
       }
     end
     reply text, attachments: attachments
