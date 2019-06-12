@@ -113,33 +113,36 @@ class EloController < ApplicationController
     players = Player.where(team_id: current_team).where("user_id like ?", "%#{user_id}%").includes(:game_type).take(20)
     reply "You haven't played any ELO rated games yet." and return if players.empty?
     attachments = players.map do |player|
-      games = player.games.includes(:player_one, :player_two).order(:created_at).last(5)
+      games = player.games.includes(:player_one, :player_two).order(:created_at).last(5).reverse
+      fields = [
+          {
+              title: "Wins",
+              value: player.number_of_wins,
+              short: true
+          },
+          {
+              title: "Loses",
+              value: player.number_of_loses,
+              short: true
+          },
+          {
+              title: "Recent Games",
+              value: games.map { |game| "• <!date^#{game.created_at.to_i}^{date_short_pretty} at {time}|#{game.created_at.strftime('%b %d, %Y at %l:%M%p %Z')}>: #{game.result_for(player)} #{game.opponent(player).team_tag}" }.join("\n"),
+              short: false
+          }
+      ]
+      if player.number_of_ties > 0
+        fields.insert(2, {
+            title: "Ties",
+            value: player.number_of_ties,
+            short: true
+        })
+      end
       {
         title: player.team_tag,
         fallback: "Elo rating: #{player.rating}",
         text: "Elo rating: #{player.rating}",
-        fields: [
-            {
-                title: "Wins",
-                value: player.number_of_wins,
-                short: true
-            },
-            {
-                title: "Loses",
-                value: player.number_of_loses,
-                short: true
-            },
-            {
-                title: "Ties",
-                value: player.number_of_ties,
-                short: true
-            },
-            {
-                title: "Games",
-                value: games.map { |game| "#{game.player_one.team_tag} beat #{game.player_two.team_tag} (<!date^#{game.created_at.to_i}^{date_short_pretty} at {time}|#{game.created_at.strftime('%b %d, %Y at %l:%M%p %Z')}>)" }.join("\n"),
-                short: false
-            }
-        ],
+        fields: fields,
         footer: player.game_type.game_type.titleize,
         footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
         ts: ts
