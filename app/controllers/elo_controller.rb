@@ -118,11 +118,15 @@ class EloController < ApplicationController
     reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "for #{type} " : ""}yet." and return if players.empty?
     attachments = players.map do |player|
       games = player.games.includes(:player_one, :player_two).order(:created_at).last(5).reverse
-      ranked = Player.find_by_sql([<<-SQL, team_id: current_team, user_id: user_id, game_type: type])
-with ranked as (select *, rank() over (order by rating desc) from players inner join game_types on players.game_type_id = game_types.id where team_id = :team_id and (:game_type IS NULL OR game_types.game_type = :game_type))
-select * from ranked as results
+      ranked = Player.find_by_sql([<<-SQL, team_id: current_team, user_id: user_id, game_type_id: player.game_type_id])
+with ranked as (select players.*, rank() over (order by rating desc)
+                from players
+                where players.team_id = :team_id
+                  and players.game_type_id = :game_type_id)
+select *
+from ranked as results
 where results.rank between (select rank - 1 from ranked as above where above.user_id = :user_id)
-          and (select rank + 1 from ranked as above where above.user_id = :user_id)
+          and (select rank + 1 from ranked as below where below.user_id = :user_id)
 order by results.rank
       SQL
       fields = [
