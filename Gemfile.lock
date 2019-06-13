@@ -1,7 +1,6 @@
 GIT
-  remote: https://github.com/wakeless/elo.git
-  revision: c67559efbd39a67c0f9667dea9cbf3d3e3d8b6dd
-  branch: equal-change
+  remote: https://github.com/alexinman/elo.git
+  revision: 203b7f603660d7b9113982906e8c2f1de4a63983
   specs:
     elo (0.1.0)
 
