@@ -161,7 +161,6 @@ order by results.rank
       {
           title: player.team_tag,
           fallback: "Elo rating: #{player.rating}",
-          text: "Elo rating: #{player.rating}",
           fields: fields,
           footer: player.game_type.game_type.titleize,
           footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
