@@ -3,6 +3,8 @@ class Player < ActiveRecord::Base
 
   after_initialize :store_current_rating
 
+  attr_reader :rank
+
   def games
     return @games unless @games.nil?
     return [] unless self.id.present?

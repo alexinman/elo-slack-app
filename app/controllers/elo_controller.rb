@@ -118,7 +118,21 @@ class EloController < ApplicationController
     reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "for #{type} " : ""}yet." and return if players.empty?
     attachments = players.map do |player|
       games = player.games.includes(:player_one, :player_two).order(:created_at).last(5).reverse
+      ranked = Player.find_by_sql(<<-SQL, team_id: current_team, user_id: user_id)
+with ranked as (select *, rank() over (order by rating desc) from players where team_id = :team_id
+                                                                            and game_type_id = 1)
+select *
+from ranked as results
+where results.rank between (select rank - 1 from ranked as above where above.user_id = :user_id)
+          and (select rank + 1 from ranked as above where above.user_id = :user_id)
+order by results.rank
+      SQL
       fields = [
+          {
+              title: "Rank",
+              value: ranked.each { |p| "#{p.rank}. #{p.team_tag} (#{p.rating})" }.join("\n"),
+              short: false
+          },
           {
               title: "Wins",
               value: player.number_of_wins,
@@ -143,13 +157,13 @@ class EloController < ApplicationController
         })
       end
       {
-        title: player.team_tag,
-        fallback: "Elo rating: #{player.rating}",
-        text: "Elo rating: #{player.rating}",
-        fields: fields,
-        footer: player.game_type.game_type.titleize,
-        footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
-        ts: ts
+          title: player.team_tag,
+          fallback: "Elo rating: #{player.rating}",
+          text: "Elo rating: #{player.rating}",
+          fields: fields,
+          footer: player.game_type.game_type.titleize,
+          footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
+          ts: ts
       }
     end
     reply "", attachments: attachments
