@@ -118,11 +118,10 @@ class EloController < ApplicationController
     reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "for #{type} " : ""}yet." and return if players.empty?
     attachments = players.map do |player|
       games = player.games.includes(:player_one, :player_two).order(:created_at).last(5).reverse
-      ranked = Player.find_by_sql(<<-SQL, team_id: current_team, user_id: user_id)
+      ranked = Player.find_by_sql([<<-SQL, team_id: current_team, user_id: user_id])
 with ranked as (select *, rank() over (order by rating desc) from players where team_id = :team_id
                                                                             and game_type_id = 1)
-select *
-from ranked as results
+select * from ranked as results
 where results.rank between (select rank - 1 from ranked as above where above.user_id = :user_id)
           and (select rank + 1 from ranked as above where above.user_id = :user_id)
 order by results.rank
@@ -130,7 +129,7 @@ order by results.rank
       fields = [
           {
               title: "Rank",
-              value: ranked.each { |p| "#{p.rank}. #{p.team_tag} (#{p.rating})" }.join("\n"),
+              value: ranked.map { |p| "#{p.rank}. #{p.team_tag} (#{p.rating})" }.join("\n"),
               short: false
           },
           {
