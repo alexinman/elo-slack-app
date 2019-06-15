@@ -82,8 +82,8 @@ class EloController < ApplicationController
     game_type = find_game_type(type)
     return unless game_type
 
-    singles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 1).order(rating: :desc).take(10)
-    doubles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 2).order(rating: :desc).take(10)
+    singles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 1).order(rating: :desc, updated_at: :asc).take(10)
+    doubles = Player.where(team_id: current_team, game_type_id: game_type.id, team_size: 2).order(rating: :desc, updated_at: :asc).take(10)
     attachments = []
 
     reply "No one has played any ELO rated games of #{type} yet." and return if singles.empty? && doubles.empty?
