@@ -1,15 +1,12 @@
 class EloController < ApplicationController
   include ActionView::Helpers::AssetUrlHelper
 
-  around_filter :error_handling
   before_filter :verify_slack_signature
 
   VICTORY_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced',
                    'routed', 'obliterated', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed',
                    'crushed', 'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned', 'wrecked']
   TIED_TERMS = ['tied', 'drawed']
-
-  SLACK_ID_REGEX = '<([^\|>]*)[^>]*>'
 
   def elo
     render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
@@ -33,32 +30,6 @@ class EloController < ApplicationController
   end
 
   private
-
-  def verify_slack_signature
-    return if ENV['SKIP_SLACK_SIGNING'] # for easier dev debugging
-    version_number = 'v0' # always v0 for now
-    timestamp = request.headers['X-Slack-Request-Timestamp']
-    raw_body = request.body.read
-    sig_basestring = [version_number, timestamp, raw_body].join(':')
-
-    signing_secret = ENV['SLACK_SIGNING_SECRET'].to_s
-    digest = OpenSSL::Digest::SHA256.new
-    hex_hash = OpenSSL::HMAC.hexdigest(digest, signing_secret, sig_basestring)
-    computed_signature = [version_number, hex_hash].join('=')
-    slack_signature = request.headers['X-Slack-Signature']
-
-    render nothing: true, status: :unauthorized if computed_signature != slack_signature
-  end
-
-  def error_handling
-    ActiveRecord::Base.transaction do
-      yield
-    end
-  rescue => e
-    Rails.logger.error "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
-    reply "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:", error: true
-    render json: @response, status: :ok
-  end
 
   def help
     attachments = [
@@ -232,30 +203,13 @@ order by results.rank
     return nil
   end
 
-  def reply(text, in_channel: false, attachments: [], error: false)
-    raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present? && !error
-    @response = {
-        response_type: in_channel ? "in_channel" : "ephemeral",
-        text: text,
-        attachments: attachments
-    }
-  end
-
-  def win_emoji()
+  def win_emoji
     %w(aaw_yeah awesome awesomesauce awwyeah bananadance carlton cheers clapping congrats dabward dancing_pickle dank datboi deadpool drake excellent fancy fastparrot feelssogood fiestaparrot foleydance gandalf gusta happytony happy_cloud happy_tim heh-heh-heh-hao-owrrrr-rah-heh-heh-heh-heh-huh-huh-haow-hah-haough johncena mat_icon_whatshot nailedit notinmyhouse nyan obama_not_bad parrot party-corgi partywizard party_dino party_frog party_mim_cat party_trash_dove pewpew quag rekt slav_squat spiderman success sunglasses-on-a-baby thanks travis_passed very_nice woohoo yeah yeet yes).sample
   end
 
   def lose_emoji(team)
     return 'shame' if team.include?('@UBK70UVP1')
     %w(angrytony angry_tim backs-away bruh collins crying disappear disappointed_jacob doh doodie drypenguin dumpster_fire facepalm feelsbad flood garbage grumpycat haha leftshark mooning nooooooo numb okay okthen oof patrickboo puddlearm puke raised_eyebrow sadparrot sadpepe sad_mac sad_rowser santa-derp shame somebodykillme surprised_pikachu swear thisstraycatlookslikegrandma travis_failed triggered unimpressed wellthen why wowen wtf yuno).sample
-  end
-
-  def current_team
-    params[:team_id]
-  end
-
-  def current_user
-    "@#{params[:user_id]}"
   end
 
   def ts
