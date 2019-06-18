@@ -57,6 +57,21 @@ class Player < ActiveRecord::Base
     Game.where(player_one.or(player_two)).where(result: 0.5).count
   end
 
+  def surrounding_ranked_players
+    Player.find_by_sql([<<-SQL, team_id: team_id, user_id: user_id, game_type_id: game_type_id, team_size: team_size])
+with ranked as (select players.*, rank() over (order by rating desc, updated_at asc)
+                from players
+                where players.team_id = :team_id
+                  and players.game_type_id = :game_type_id
+                  and players.team_size = :team_size)
+select *
+from ranked as results
+where results.rank between (select rank - 1 from ranked as above where above.user_id = :user_id)
+          and (select rank + 1 from ranked as below where below.user_id = :user_id)
+order by results.rank
+    SQL
+  end
+
   private
 
   def store_current_rating
