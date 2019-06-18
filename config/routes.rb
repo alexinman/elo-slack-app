@@ -1,12 +1,6 @@
 Rails.application.routes.draw do
   post '/elo', :controller => 'elo', :action => 'elo'
-end
-Rails.application.routes.draw do
-  get '/history', :controller => 'webapi', :action => 'history'
-end
-Rails.application.routes.draw do
-  get '/leaderboard', :controller => 'webapi', :action => 'leaderboard'
-end
-Rails.application.routes.draw do
-  get '/gametypes', :controller => 'webapi', :action => 'gametypes'
+  get '/game/history', :controller => 'game', :action => 'history'
+  get '/player/leaderboard', :controller => 'player', :action => 'leaderboard'
+  get '/game/gametypes', :controller => 'game', :action => 'gametypes'
 end

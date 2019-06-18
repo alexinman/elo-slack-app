@@ -1,0 +1,27 @@
+class GameController < ApplicationController
+
+  #history of all games
+  def history
+    per_page = params[:per_page].try(:to_i) || 10
+    page = params[:page].try(:to_i) || 1
+    games = Game.order(updated_at: :desc).limit(per_page).offset((page - 1) * per_page)
+    render json: games, status: :ok
+  end
+
+  #history of 1 game
+  def leaderboard
+    type = params[:type]
+    team_size = params[:team_size]
+    return render json: {error: "game name required"}, status: :bas_request if type == nil
+    game_type = GameType.where(game_type: type).take
+    return render json: {error: "game not found"}, status: :bad_request if game_type == nil
+    players = Player.where(game_type_id: game_type).order(rating: :desc)
+    players = players.where(team_size: team_size) if team_size != nil
+    render json: players, status: :ok
+  end
+
+  #get list of games
+  def gametypes
+    render json: GameType.all, status: :ok
+  end
+end
