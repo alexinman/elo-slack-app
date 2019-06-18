@@ -42,7 +42,18 @@ ActiveRecord::Schema.define(version: 20190612170820) do
     t.integer  "team_size",    default: 1,    null: false
   end
 
+  create_table  "challenges",                 force: :cascade do |t|
+    t.integer   "player_one_id",              null: false
+    t.integer   "player_two_id",              null: false
+    t.integer   "game_id",     default: -1,   null: false
+    t.datetime  "created_at",                 null: false
+    t.datetime  "updated_at",                 null: false
+  end
+
   add_foreign_key "games", "players", column: "player_one_id", on_delete: :cascade
   add_foreign_key "games", "players", column: "player_two_id", on_delete: :cascade
   add_foreign_key "players", "game_types", on_delete: :cascade
+  add_foreign_key "challenges", "players", column: "player_one_id", on_delete: :cascade
+  add_foreign_key "challenges", "players", column: "player_two_id", on_delete: :cascade
+  add_foreign_key "challenges", "games", column: "game_id", on_delete: :cascade
 end

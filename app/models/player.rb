@@ -19,6 +19,10 @@ class Player < ActiveRecord::Base
     log_game(other_player, logged_by_user_id, :plays_draw)
   end
 
+  def challenged(other_player)
+    # wip pending updates to schema
+  end
+
   def elo_player
     @elo_player ||= Elo::Player.new(rating: rating, games_played: games.count)
   end
@@ -71,5 +75,9 @@ class Player < ActiveRecord::Base
     self.rating = elo_player.rating
     other_player.rating = other_player.elo_player.rating
     other_player.save! && save!
+  end
+
+  def log_challenge(other_player)
+    # wip pending updates to schema
   end
 end

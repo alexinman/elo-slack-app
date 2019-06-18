@@ -23,6 +23,8 @@ class EloController < ApplicationController
       games
     when "help"
       help
+    when "challenge"
+      challenge
     else
       game
     end
@@ -187,6 +189,25 @@ order by results.rank
     else
       return help
     end
+  end
+
+  def challenge
+    reply "Hey, we're working on it!" and return # safeguard while wip
+
+    _, p1, p2, type, p3 = params[:text].match(/^#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +at +(.*)(?: +with +#{SLACK_ID_REGEX})?$/).to_a
+    return help if p1.blank? || type.blank?
+
+    reply "2 on 1 isn't very fair :dusty_stick:" and return if [p2, p3].compact.count == 1
+    reply "You really think you can be in two places at the same time? :gottagofast:" and return if [p1, p2, p3].include? current_user
+    team_size = p2.present? && p3.present? ? 2 : 1
+    reply "Am I seeing double or did you enter the same person multiple times? :twinsparrot:" and return if [p1, p2, p3].compact.uniq.count != team_size * 2
+
+    game_type = find_game_type(type)
+    return unless game_type
+
+    team1 = Player.where(team_id: current_team, user_id: [current_user, p3].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
+    team2 = Player.where(team_id: current_team, user_id: [p1, p2].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
+
   end
 
   def find_game_type(type)
