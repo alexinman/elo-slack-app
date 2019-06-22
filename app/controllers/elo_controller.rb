@@ -45,14 +45,12 @@ class EloController < ApplicationController
   end
 
   def leaderboard(type)
-    return help unless type.present?
-
     game_type = find_game_type(type)
     return unless game_type
 
     results = LeaderboardViewModel.leaderboard(team_id: current_team, game_type_id: game_type.id).items
-    reply "No one has played any ELO rated games of #{type} yet." and return if results.empty?
-    reply "Here is the current leaderboard for #{type}:", attachments: results
+    reply "No one has played any ELO rated games of #{game_type.game_type} yet." and return if results.empty?
+    reply "Here is the current leaderboard for #{game_type.game_type}:", attachments: results
   end
 
   def stats(args)
@@ -60,18 +58,18 @@ class EloController < ApplicationController
     type = args.gsub(/#{SLACK_ID_REGEX}/, '').strip
     user_id ||= current_user
     results = PlayerViewModel.statistics(team_id: current_team, user_id: user_id, game_type: type).items
-    reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "for #{type} " : ""}yet." and return if results.empty?
+    reply "#{user_id == current_user ? "You haven't" : "<#{user_id}> hasn't"} played any ELO rated games #{type.present? ? "of #{type} " : ""}yet." and return if results.empty?
     reply attachments: results
   end
 
   def register(type)
-    return help unless type.present?
+    type = type.presence || params[:channel_name]
 
     game_type = GameType.where(team_id: current_team, game_type: type).take
     reply "That game has already been registered." and return if game_type.present?
 
     game_type = GameType.create!(team_id: current_team, game_type: type)
-    reply "Successfully registered #{game_type.game_type} for this team!"
+    reply "Successfully registered #{game_type.game_type} as a game for this team!"
   end
 
   def games
@@ -85,8 +83,8 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +([a-z ]*) +#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +at +(.*)$/).to_a
-    return help if p1.blank? || p3.blank? || type.blank?
+    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +([a-z ]*) +#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})?(?: +at +(.*))?$/).to_a
+    return help if p1.blank? || p3.blank?
 
     reply "2 on 1 isn't very fair :dusty_stick:" and return if [p2, p4].compact.count == 1
     reply "A third-party witness must enter the game for it to count." and return if [p1, p2, p3, p4].include? current_user
@@ -103,16 +101,17 @@ class EloController < ApplicationController
     case verb.strip
     when *VICTORY_TERMS
       team1.won_against team2, current_user
-      reply "Congratulations to #{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: on defeating #{team2.team_tag} (#{team2.rating_change}) :#{lose_emoji(team2.team_tag)}: at #{type}!", in_channel: true
+      reply "Congratulations to #{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: on defeating #{team2.team_tag} (#{team2.rating_change}) :#{lose_emoji(team2.team_tag)}: at #{game_type.game_type}!", in_channel: true
     when *TIED_TERMS
       team1.tied_with team2, current_user
-      reply "#{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: tied #{team2.team_tag} (#{team2.rating_change}) :#{win_emoji}: at #{type}.", in_channel: true
+      reply "#{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: tied #{team2.team_tag} (#{team2.rating_change}) :#{win_emoji}: at #{game_type.game_type}.", in_channel: true
     else
       return help
     end
   end
 
   def find_game_type(type)
+    type = type.presence || params[:channel_name]
     game_type = GameType.where(team_id: current_team, game_type: type).take
     return game_type unless game_type.nil?
     attachments = [
