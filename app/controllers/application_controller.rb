@@ -51,7 +51,9 @@ class ApplicationController < ActionController::Base
       yield
     end
   rescue => e
-    Rails.logger.error "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
-    render json: {text: "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"}, status: :ok
+    message = "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
+    Rails.logger.error message
+    text = Rails.env.development? ? message : "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"
+    render json: {text: text}, status: :ok
   end
 end
