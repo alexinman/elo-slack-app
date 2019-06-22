@@ -9,7 +9,6 @@ class EloController < ApplicationController
   TIED_TERMS = ['tied', 'drawed']
 
   def elo
-    render json: {message: "missing parameter team_id"}, status: :bad_request if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request if params[:user_id].blank?
     command, _, other = params[:text].partition(" ")
     case command

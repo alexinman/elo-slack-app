@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   post '/elo', :controller => 'elo', :action => 'elo'
-  get '/game/history', :controller => 'game', :action => 'history'
-  get '/player/leaderboard', :controller => 'player', :action => 'leaderboard'
-  get '/game/gametypes', :controller => 'game', :action => 'gametypes'
+
+  scope :path => 'api', :controller => 'player' do
+    get '/players', :action => 'players'
+  end
+
+  scope :path => 'api', :controller => 'game' do
+    get '/games', :action => 'games'
+    get '/games/types', :action => 'types'
+  end
 end
