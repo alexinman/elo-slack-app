@@ -3,6 +3,10 @@ class Player < ActiveRecord::Base
 
   after_initialize :store_current_rating
 
+  scope :for_user_id, ->(user_id) do
+    where('user_id ilike ?', "%#{user_id}%")
+  end
+
   def games
     return @games unless @games.nil?
     return [] unless self.id.present?
@@ -43,7 +47,7 @@ class Player < ActiveRecord::Base
     Game.where(player_one_wins.or(player_two_wins)).count
   end
 
-  def number_of_loses
+  def number_of_losses
     player_one = Game.arel_table[:player_one_id].eq(self.id)
     player_two = Game.arel_table[:player_two_id].eq(self.id)
     player_one_loses = player_one.and(Game.arel_table[:result].eq(0))
@@ -52,24 +56,10 @@ class Player < ActiveRecord::Base
   end
 
   def number_of_ties
+    return @ties if defined? @ties
     player_one = Game.arel_table[:player_one_id].eq(self.id)
     player_two = Game.arel_table[:player_two_id].eq(self.id)
-    Game.where(player_one.or(player_two)).where(result: 0.5).count
-  end
-
-  def surrounding_ranked_players
-    Player.find_by_sql([<<-SQL, team_id: team_id, user_id: user_id, game_type_id: game_type_id, team_size: team_size])
-with ranked as (select players.*, rank() over (order by rating desc, updated_at asc)
-                from players
-                where players.team_id = :team_id
-                  and players.game_type_id = :game_type_id
-                  and players.team_size = :team_size)
-select *
-from ranked as results
-where results.rank between (select rank - 1 from ranked as above where above.user_id = :user_id)
-          and (select rank + 1 from ranked as below where below.user_id = :user_id)
-order by results.rank
-    SQL
+    @ties = Game.where(player_one.or(player_two)).where(result: 0.5).count
   end
 
   private

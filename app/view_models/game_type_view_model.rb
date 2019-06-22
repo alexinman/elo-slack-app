@@ -12,7 +12,7 @@ class GameTypeViewModel < ApplicationViewModel
     end
 
     def sql_order(options = {})
-      case options[:order]
+      case options[:order].to_s
       when 'game_type'
         model_class.arel_table[:game_type]
       when 'created_at'

@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
     render json: {message: 'missing team_id'}, status: :bad_request
   end
 
-  def reply(text, in_channel: false, attachments: [])
+  def reply(text=nil, in_channel: false, attachments: [])
     raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present?
     @response = {
         response_type: in_channel ? "in_channel" : "ephemeral",

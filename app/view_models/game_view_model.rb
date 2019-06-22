@@ -8,6 +8,13 @@ class GameViewModel < ApplicationViewModel
       super(rel, options)
     end
 
+    def recent_games(player)
+      rel = player.games.includes(:player_one, :player_two)
+      rel = sort(rel, order: :created_at, direction: :desc)
+      data = paginate(rel, per_page: 5) { |game| "• #{game.created_at.slack_format}: #{game.result_for(player)}" }
+      new(data)
+    end
+
     private
 
     def model_class
@@ -15,7 +22,7 @@ class GameViewModel < ApplicationViewModel
     end
 
     def sql_order(options = {})
-      case options[:order]
+      case options[:order].to_s
       when 'updated_at'
         model_class.arel_table[:updated_at]
       when 'created_at'
