@@ -1,13 +1,19 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
+  before_filter :check_team_id
   around_filter :error_handling
 
   SLACK_ID_REGEX = '<([^\|>]*)[^>]*>'
 
   private
 
-  def reply(text, in_channel: false, attachments: [])
+  def check_team_id
+    return if params[:team_id].present?
+    render json: {message: 'missing team_id'}, status: :bad_request
+  end
+
+  def reply(text=nil, in_channel: false, attachments: [])
     raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present?
     @response = {
         response_type: in_channel ? "in_channel" : "ephemeral",
@@ -45,7 +51,9 @@ class ApplicationController < ActionController::Base
       yield
     end
   rescue => e
-    Rails.logger.error "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
-    render json: {text: "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"}, status: :ok
+    message = "#{e.message}\n#{e.backtrace.first(5).join("\n")}"
+    Rails.logger.error message
+    text = Rails.env.development? ? message : "Uh oh! Something went wrong. Please contact Alex. :dusty_stick:"
+    render json: {text: text}, status: :ok
   end
 end
