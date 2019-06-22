@@ -4,6 +4,10 @@ class Game < ActiveRecord::Base
 
   before_create :set_extra_columns
 
+  scope :for_user_id, ->(user_id) do
+    where('player_one_user_id ilike ? or player_two_user_id ilike ?', "%#{user_id}%", "%#{user_id}%")
+  end
+
   def opponent(player)
     raise ArgumentError, "player did not play in this game" unless [player_one_id, player_two_id].include? player.id
     player_one_id == player.id ? player_two : player_one
