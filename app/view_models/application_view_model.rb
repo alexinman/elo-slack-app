@@ -66,11 +66,11 @@ class ApplicationViewModel
     end
 
     def singles_image_url
-      image_url('baseline_person_black_18dp.png')
+      image_url('baseline_person_black_18dp.png', host: AppConfig[:root_url])
     end
 
     def doubles_image_url
-      image_url('baseline_people_black_18dp.png')
+      image_url('baseline_people_black_18dp.png', host: AppConfig[:root_url])
     end
 
     def ts
