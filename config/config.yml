@@ -11,7 +11,7 @@ staging:
   base_domain: elo-slack-app-test.herokuapp.com/
   root_url: https://elo-slack-app-test.herokuapp.com/
 
-productiono:
+production:
   <<: *defaults
   base_domain: elo-slack-app.herokuapp.com/
   root_url: https://elo-slack-app.herokuapp.com/
