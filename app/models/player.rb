@@ -62,7 +62,46 @@ class Player < ActiveRecord::Base
     @ties = Game.where(player_one.or(player_two)).where(result: 0.5).count
   end
 
+  def nemesis
+    return @nemesis if defined? @nemesis
+    @nemesis = team_size == 2 ? doubles_nemesis : singles_nemesis
+  end
+
   private
+
+  def singles_nemesis
+    Player.find_by_sql([<<-SQL, team_id: team_id, player_id: id, game_type_id: game_type_id, team_size: team_size]).first.try(:team_tag)
+      WITH player_games AS (
+        SELECT id,
+          player_one_id AS opponent_id,
+          result = 0 AS win
+        FROM games
+        WHERE player_two_id = :player_id
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size
+        UNION 
+        SELECT id,
+          player_two_id AS opponent_id,
+          result = 1 as win
+        FROM games
+        WHERE player_one_id = :player_id
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size)
+      SELECT * FROM players
+      WHERE id IN (SELECT opponent_id
+                   FROM player_games
+                   GROUP BY opponent_id
+                   HAVING count(opponent_id) > 4
+                   ORDER BY sum(win::integer)::float / count(opponent_id)::float ASC
+                   LIMIT 1);
+    SQL
+  end
+
+  def doubles_nemesis
+    singles_nemesis
+  end
 
   def store_current_rating
     @rating_before = self.rating

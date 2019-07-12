@@ -37,6 +37,7 @@ class PlayerViewModel < ApplicationViewModel
       fields << field('Wins', player.number_of_wins, short: true)
       fields << field('Losses', player.number_of_losses, short: true)
       fields << field('Ties', player.number_of_ties, short: true) if player.number_of_ties > 0
+      fields << field('Nemesis', player.nemesis) if player.nemesis.present?
       fields << field('Recent Games', GameViewModel.recent_games(player).items.join("\n"))
       fields
     end
