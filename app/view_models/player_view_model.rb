@@ -14,6 +14,9 @@ class PlayerViewModel < ApplicationViewModel
                 .includes(:game_type)
       rel = rel.where(game_types: {game_type: options[:game_type]}) if options[:game_type].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
+
+      select_statement = Player.send(:sanitize_sql, ['0 as id, max(team_id) as team_id, ? as user_id, game_type_id, team_size, avg(rating) as rating', options[:user_id]])
+      rel = rel.group(:game_type_id, :team_size).select(select_statement)
       data = paginate(rel, per_page: 20, &method(:statistics_summary))
       new(data)
     end
@@ -33,7 +36,8 @@ class PlayerViewModel < ApplicationViewModel
 
     def fields(player)
       fields = []
-      fields << field('Rank', LeaderboardViewModel.surrounding_ranks(player).items.join("\n"))
+      fields << field('Rank', LeaderboardViewModel.surrounding_ranks(player).items.join("\n")) if player.team_size == 1
+      fields << field('Average Rating', player.rating) if player.team_size > 1
       fields << field('Wins', player.number_of_wins, short: true)
       fields << field('Losses', player.number_of_losses, short: true)
       fields << field('Ties', player.number_of_ties, short: true) if player.number_of_ties > 0
