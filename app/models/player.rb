@@ -8,11 +8,8 @@ class Player < ActiveRecord::Base
   end
 
   def games
-    return @games unless @games.nil?
-    return [] unless self.id.present?
-    player_one = Game.arel_table[:player_one_id].eq(self.id)
-    player_two = Game.arel_table[:player_two_id].eq(self.id)
-    @games = Game.where(player_one.or(player_two))
+    return Game.none unless id.present?
+    Game.for_user_id(user_id).where(team_id: team_id, game_type_id: game_type_id, team_size: team_size)
   end
 
   def won_against(other_player, logged_by_user_id)
@@ -62,10 +59,75 @@ class Player < ActiveRecord::Base
     @ties = Game.where(player_one.or(player_two)).where(result: 0.5).count
   end
 
+  def nemesis
+    return @nemesis if defined? @nemesis
+    individual = user_id.split('-').size == 1
+    @nemesis = individual && team_size == 2 ? doubles_nemesis : singles_nemesis
+  end
+
   private
 
+  def singles_nemesis
+    Player.find_by_sql([<<-SQL, team_id: team_id, player_id: id, game_type_id: game_type_id, team_size: team_size]).first.try(:team_tag)
+      WITH player_games AS (
+        SELECT id,
+          player_one_id AS opponent_id,
+          result = 0 AS win
+        FROM games
+        WHERE player_two_id = :player_id
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size
+        UNION 
+        SELECT id,
+          player_two_id AS opponent_id,
+          result = 1 as win
+        FROM games
+        WHERE player_one_id = :player_id
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size)
+      SELECT * FROM players
+      WHERE id IN (SELECT opponent_id
+                   FROM player_games
+                   GROUP BY opponent_id
+                   HAVING count(opponent_id) > 4
+                   ORDER BY sum(win::integer)::float / count(opponent_id)::float ASC
+                   LIMIT 1);
+    SQL
+  end
+
+  def doubles_nemesis
+    Player.find_by_sql([<<-SQL, team_id: team_id, user_id: user_id, game_type_id: game_type_id, team_size: team_size]).first.try(:team_tag)
+      WITH player_games AS (
+        SELECT id,
+          regexp_split_to_table(player_one_user_id, '-') AS opponent_user_id,
+          result = 0 AS win
+        FROM games
+        WHERE player_two_user_id ilike '%' || :user_id || '%'
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size
+        UNION 
+        SELECT id,
+          regexp_split_to_table(player_two_user_id, '-') AS opponent_user_id,
+          result = 1 as win
+        FROM games
+        WHERE player_one_user_id ilike '%' || :user_id || '%'
+          AND team_id = :team_id
+          AND game_type_id = :game_type_id
+          AND team_size = :team_size)
+      SELECT opponent_user_id as user_id
+      FROM player_games
+      GROUP BY opponent_user_id
+      HAVING count(opponent_user_id) > 4
+      ORDER BY sum(win::integer)::float / count(opponent_user_id)::float ASC
+      LIMIT 1;
+    SQL
+  end
+
   def store_current_rating
-    @rating_before = self.rating
+    @rating_before = self.rating rescue 1000
   end
 
   def log_game(other_player, logged_by_user_id, result)

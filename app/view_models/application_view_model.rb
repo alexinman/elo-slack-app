@@ -54,6 +54,7 @@ class ApplicationViewModel
       page = [options[:page].to_i, 1].max
       per_page = [1, (options[:per_page] || 10).to_i, 100].sort.second
       item_count = rel.except(:select).count
+      item_count = item_count.count if item_count.is_a? Hash
       page_count = (item_count / per_page) + ((item_count % per_page == 0) ? 0 : 1)
       paged_rel = rel.paginate(page: page, per_page: per_page)
       {
@@ -74,7 +75,7 @@ class ApplicationViewModel
     end
 
     def ts
-      @ts ||= Time.now.to_i
+      Time.now.to_i
     end
   end
 end
