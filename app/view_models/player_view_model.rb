@@ -11,8 +11,7 @@ class PlayerViewModel < ApplicationViewModel
     def statistics(options = {})
       rel = model_class.where(team_id: options[:team_id])
                 .for_user_id(options[:user_id])
-                .includes(:game_type)
-      rel = rel.where(game_types: {game_type: options[:game_type]}) if options[:game_type].present?
+      rel = rel.joins(:game_type).where(game_types: {game_type: options[:game_type]}) if options[:game_type].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
 
       select_statement = Player.send(:sanitize_sql, ['max(players.id) as id, max(players.team_id) as team_id, ? as user_id, players.game_type_id, players.team_size, avg(players.rating) as rating', options[:user_id]])
@@ -24,9 +23,6 @@ class PlayerViewModel < ApplicationViewModel
     private
 
     def statistics_summary(player)
-      5.times { puts '*' }
-      puts player.inspect
-      5.times { puts '*' }
       {
           title: player.team_tag,
           fallback: "Elo rating: #{player.rating}",
