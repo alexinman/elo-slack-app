@@ -58,12 +58,12 @@ class Player < ActiveRecord::Base
   def nemesis
     return @nemesis if defined? @nemesis
     individual = user_id.split('-').size == 1
-    @nemesis = individual && team_size == 2 ? doubles_nemesis : singles_nemesis
+    @nemesis = individual && team_size == 2 ? doubles_individual_nemesis : team_nemesis
   end
 
   private
 
-  def singles_nemesis
+  def team_nemesis
     Player.find_by_sql([<<-SQL, team_id: team_id, player_id: id, game_type_id: game_type_id, team_size: team_size]).first.try(:team_tag)
       WITH player_games AS (
         SELECT id,
@@ -87,13 +87,14 @@ class Player < ActiveRecord::Base
       WHERE id IN (SELECT opponent_id
                    FROM player_games
                    GROUP BY opponent_id
-                   HAVING count(opponent_id) > 4
+                   HAVING count(opponent_id) > 3
+                     AND sum(win::integer)::float / count(opponent_id)::float < 0.5
                    ORDER BY sum(win::integer)::float / count(opponent_id)::float ASC
                    LIMIT 1);
     SQL
   end
 
-  def doubles_nemesis
+  def doubles_individual_nemesis
     Player.find_by_sql([<<-SQL, team_id: team_id, user_id: user_id, game_type_id: game_type_id, team_size: team_size]).first.try(:team_tag)
       WITH player_games AS (
         SELECT id,
@@ -116,7 +117,8 @@ class Player < ActiveRecord::Base
       SELECT opponent_user_id as user_id
       FROM player_games
       GROUP BY opponent_user_id
-      HAVING count(opponent_user_id) > 4
+      HAVING count(opponent_user_id) > 3
+        AND sum(win::integer)::float / count(opponent_user_id)::float < 0.5
       ORDER BY sum(win::integer)::float / count(opponent_user_id)::float ASC
       LIMIT 1;
     SQL
