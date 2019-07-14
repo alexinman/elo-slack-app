@@ -83,7 +83,7 @@ class EloController < ApplicationController
   end
 
   def game
-    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +([a-z ]*) +#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})?(?: +at +(.*))?$/).to_a
+    _, p1, p2, verb, p3, p4, type = params[:text].match(/^#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})? +([a-zA-Z ]*) +#{SLACK_ID_REGEX}(?: +and +#{SLACK_ID_REGEX})?(?: +at +(.*))?$/).to_a
     return help if p1.blank? || p3.blank?
 
     reply "2 on 1 isn't very fair :dusty_stick:" and return if [p2, p4].compact.count == 1
@@ -98,7 +98,7 @@ class EloController < ApplicationController
     team1 = Player.where(team_id: current_team, user_id: [p1, p2].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
     team2 = Player.where(team_id: current_team, user_id: [p3, p4].compact.sort.join('-'), game_type_id: game_type.id, team_size: team_size).first_or_initialize
 
-    case verb.strip
+    case verb.strip.downcase
     when *VICTORY_TERMS
       team1.won_against team2, current_user
       reply "Congratulations to #{team1.team_tag} (#{team1.rating_change}) :#{win_emoji}: on defeating #{team2.team_tag} (#{team2.rating_change}) :#{lose_emoji(team2.team_tag)}: at #{game_type.game_type}!", in_channel: true
