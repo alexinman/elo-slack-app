@@ -15,7 +15,7 @@ class PlayerViewModel < ApplicationViewModel
       rel = rel.where(game_types: {game_type: options[:game_type]}) if options[:game_type].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
 
-      select_statement = Player.send(:sanitize_sql, ['0 as id, max(team_id) as team_id, ? as user_id, game_type_id, team_size, avg(rating) as rating', options[:user_id]])
+      select_statement = Player.send(:sanitize_sql, ['max(id) as id, max(team_id) as team_id, ? as user_id, game_type_id, team_size, avg(rating) as rating', options[:user_id]])
       rel = rel.group(:game_type_id, :team_size).select(select_statement)
       data = paginate(rel, per_page: 20, &method(:statistics_summary))
       new(data)
@@ -24,6 +24,9 @@ class PlayerViewModel < ApplicationViewModel
     private
 
     def statistics_summary(player)
+      5.times { puts '*' }
+      puts player.inspect
+      5.times { puts '*' }
       {
           title: player.team_tag,
           fallback: "Elo rating: #{player.rating}",

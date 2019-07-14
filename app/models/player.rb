@@ -38,20 +38,20 @@ class Player < ActiveRecord::Base
 
   def number_of_wins
     rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
-    rel = rel.where('(player_one_user_id ilike ? and result = 1) OR (player_two_user_id ilike ? and result = 0)', user_id, user_id)
+    rel = rel.where('(player_one_user_id ilike ? and result = 1) OR (player_two_user_id ilike ? and result = 0)', "%#{user_id}%", "%#{user_id}%")
     rel.count
   end
 
   def number_of_losses
     rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
-    rel = rel.where('(player_one_user_id ilike ? and result = 0) OR (player_two_user_id ilike ? and result = 1)', user_id, user_id)
+    rel = rel.where('(player_one_user_id ilike ? and result = 0) OR (player_two_user_id ilike ? and result = 1)', "%#{user_id}%", "%#{user_id}%")
     rel.count
   end
 
   def number_of_ties
     return @ties if defined? @ties
     rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
-    rel = rel.where('(player_one_user_id ilike ? OR player_two_user_id ilike ?) and result = 0.5', user_id, user_id)
+    rel = rel.where('(player_one_user_id ilike ? OR player_two_user_id ilike ?) and result = 0.5', "%#{user_id}%", "%#{user_id}%")
     @ties = rel.count
   end
 
