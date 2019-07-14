@@ -37,26 +37,22 @@ class Player < ActiveRecord::Base
   end
 
   def number_of_wins
-    player_one = Game.arel_table[:player_one_id].eq(self.id)
-    player_two = Game.arel_table[:player_two_id].eq(self.id)
-    player_one_wins = player_one.and(Game.arel_table[:result].eq(1))
-    player_two_wins = player_two.and(Game.arel_table[:result].eq(0))
-    Game.where(player_one_wins.or(player_two_wins)).count
+    rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
+    rel = rel.where('(player_one_user_id ilike ? and result = 1) OR (player_two_user_id ilike ? and result = 0)', user_id, user_id)
+    rel.count
   end
 
   def number_of_losses
-    player_one = Game.arel_table[:player_one_id].eq(self.id)
-    player_two = Game.arel_table[:player_two_id].eq(self.id)
-    player_one_loses = player_one.and(Game.arel_table[:result].eq(0))
-    player_two_loses = player_two.and(Game.arel_table[:result].eq(1))
-    Game.where(player_one_loses.or(player_two_loses)).count
+    rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
+    rel = rel.where('(player_one_user_id ilike ? and result = 0) OR (player_two_user_id ilike ? and result = 1)', user_id, user_id)
+    rel.count
   end
 
   def number_of_ties
     return @ties if defined? @ties
-    player_one = Game.arel_table[:player_one_id].eq(self.id)
-    player_two = Game.arel_table[:player_two_id].eq(self.id)
-    @ties = Game.where(player_one.or(player_two)).where(result: 0.5).count
+    rel = Game.where(team_id: team_id, team_size: team_size, game_type_id: game_type_id)
+    rel = rel.where('(player_one_user_id ilike ? OR player_two_user_id ilike ?) and result = 0.5', user_id, user_id)
+    @ties = rel.count
   end
 
   def nemesis
