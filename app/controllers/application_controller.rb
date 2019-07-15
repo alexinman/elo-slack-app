@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
   before_filter :check_team_id
+  before_filter :check_user_id
   around_filter :error_handling
 
   SLACK_ID_REGEX = '<([^\|>]*)[^>]*>'
@@ -11,6 +12,11 @@ class ApplicationController < ActionController::Base
   def check_team_id
     return if params[:team_id].present?
     render json: {message: 'missing team_id'}, status: :bad_request
+  end
+
+  def check_user_id
+    return unless params[:user_id].blank?
+    render json: {message: "missing parameter user_id"}, status: :bad_request
   end
 
   def reply(text=nil, in_channel: false, attachments: [])
