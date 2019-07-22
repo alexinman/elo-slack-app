@@ -1,7 +1,7 @@
 class GameTypeViewModel < ApplicationViewModel
   class << self
     def list(options = {})
-      rel = model_class.where(team_id: options[:team_id])
+      rel = model_class.where(slack_team_id: options[:slack_team_id])
       super(rel, options)
     end
 
@@ -13,8 +13,8 @@ class GameTypeViewModel < ApplicationViewModel
 
     def sql_order(options = {})
       case options[:order].to_s
-      when 'game_type'
-        model_class.arel_table[:game_type]
+      when 'game_name'
+        model_class.arel_table[:game_name]
       when 'created_at'
         model_class.arel_table[:created_at]
       else

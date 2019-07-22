@@ -1,20 +1,20 @@
 class PlayerViewModel < ApplicationViewModel
   class << self
     def list(options = {})
-      rel = model_class.where(team_id: options[:team_id])
-      rel = rel.for_user_id(options[:user_id]) if options[:user_id].present?
+      rel = model_class.where(slack_team_id: options[:slack_team_id])
+      rel = rel.for_slack_user_id(options[:slack_user_id]) if options[:slack_user_id].present?
       rel = rel.where(game_type_id: options[:game_type_id]) if options[:game_type_id].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
       super(rel, options)
     end
 
     def statistics(options = {})
-      rel = model_class.where(team_id: options[:team_id])
-                .for_user_id(options[:user_id])
-      rel = rel.joins(:game_type).where(game_types: {game_type: options[:game_type]}) if options[:game_type].present?
+      rel = model_class.where(slack_team_id: options[:slack_team_id])
+                .for_slack_user_id(options[:slack_user_id])
+      rel = rel.where(game_type_id: options[:game_type_id]) if options[:game_type_id].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
 
-      select_statement = Player.send(:sanitize_sql, ['max(players.id) as id, max(players.team_id) as team_id, ? as user_id, players.game_type_id, players.team_size, avg(players.rating) as rating', options[:user_id]])
+      select_statement = Player.send(:sanitize_sql, ['max(players.id) as id, max(players.slack_team_id) as slack_team_id, ? as slack_user_id, players.game_type_id, players.team_size, avg(players.rating) as rating', options[:slack_user_id]])
       rel = rel.group(:game_type_id, :team_size).select(select_statement)
       data = paginate(rel, per_page: 20, &method(:statistics_summary))
       new(data)
@@ -27,7 +27,7 @@ class PlayerViewModel < ApplicationViewModel
           title: player.team_tag,
           fallback: "Elo rating: #{player.rating}",
           fields: fields(player),
-          footer: player.game_type.titleize,
+          footer: player.game_type.game_name.titleize,
           footer_icon: player.doubles? ? doubles_image_url : singles_image_url,
           ts: ts
       }

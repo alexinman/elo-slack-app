@@ -1,8 +1,8 @@
 class LeaderboardViewModel < PlayerViewModel
   class << self
-    def leaderboard(team_id:, game_type_id:)
-      singles = list(team_id: team_id, game_type_id: game_type_id, team_size: 1).items
-      doubles = list(team_id: team_id, game_type_id: game_type_id, team_size: 2).items
+    def leaderboard(slack_team_id:, game_type_id:)
+      singles = list(slack_team_id: slack_team_id, game_type_id: game_type_id, team_size: 1).items
+      doubles = list(slack_team_id: slack_team_id, game_type_id: game_type_id, team_size: 2).items
 
       data = []
       data << attachment(singles.join("\n"), doubles: false) if singles.present?
@@ -11,16 +11,16 @@ class LeaderboardViewModel < PlayerViewModel
     end
 
     def surrounding_ranks(player)
-      players = Player.find_by_sql([<<-SQL, team_id: player.team_id, user_id: player.user_id, game_type_id: player.game_type_id, team_size: player.team_size])
+      players = Player.find_by_sql([<<-SQL, slack_team_id: player.slack_team_id, slack_user_id: player.slack_user_id, game_type_id: player.game_type_id, team_size: player.team_size])
         WITH ranked_players AS (SELECT players.*, DENSE_RANK() OVER (ORDER BY rating DESC) AS rank
                                 FROM players
-                                WHERE players.team_id = :team_id
+                                WHERE players.slack_team_id = :slack_team_id
                                   AND players.game_type_id = :game_type_id
                                   AND players.team_size = :team_size)
         SELECT *
         FROM ranked_players
-        WHERE ranked_players.rank BETWEEN (SELECT rank - 1 FROM ranked_players WHERE user_id = :user_id)
-                  AND (SELECT rank + 1 FROM ranked_players WHERE user_id = :user_id)
+        WHERE ranked_players.rank BETWEEN (SELECT rank - 1 FROM ranked_players WHERE slack_user_id = :slack_user_id)
+                  AND (SELECT rank + 1 FROM ranked_players WHERE slack_user_id = :slack_user_id)
         ORDER BY ranked_players.rank
         LIMIT 5;
       SQL
