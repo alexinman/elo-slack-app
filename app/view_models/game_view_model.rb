@@ -1,8 +1,8 @@
 class GameViewModel < ApplicationViewModel
   class << self
     def list(options = {})
-      rel = model_class.where(team_id: options[:team_id])
-      rel = rel.for_user_id(options[:user_id]) if options[:user_id].present?
+      rel = model_class.where(slack_team_id: options[:slack_team_id])
+      rel = rel.for_slack_user_id(options[:slack_user_id]) if options[:slack_user_id].present?
       rel = rel.where(game_type_id: options[:game_type_id]) if options[:game_type_id].present?
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
       super(rel, options)
