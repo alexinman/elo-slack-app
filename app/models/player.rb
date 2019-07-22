@@ -17,7 +17,7 @@ class Player < ActiveRecord::Base
   end
 
   def team_tag
-    slack_user_id.split("-").map { |id| "<#{id}>" }.join(" and ")
+    slack_user_id.split("-").map { |id| "<#{id}>" }.to_sentence
   end
 
   def doubles?

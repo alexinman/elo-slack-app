@@ -39,7 +39,9 @@ class EloController < ApplicationController
 
   def stats
     results = PlayerViewModel.statistics(slack_team_id: current_team, slack_user_id: @parsed[:teams].first, game_type_id: @parsed[:game_type].try(:id)).items
-    reply "#{@parsed[:teams].first == current_user ? "You haven't" : "<#{@parsed[:teams].first}> hasn't"} played any ELO rated games #{game_type.present? ? "of #{game_type.game_name} " : ""}yet." and return if results.empty?
+    tag = @parsed[:teams].first.split('-').map { |id| id == current_user ? 'You' : "<#{id}>" }.sort.reverse.to_sentence
+    verb_conjugation = tag.include?('You') || tag.include?('and') ? "haven't" : "hasn't"
+    reply "#{tag} #{verb_conjugation} played any ELO rated games #{@parsed[:game_type].present? ? "of #{@parsed[:game_type].game_name} " : ""}yet." and return if results.empty?
     reply attachments: results
   end
 
@@ -51,11 +53,11 @@ class EloController < ApplicationController
   end
 
   def games
-    game_types = GameType.where(slack_team_id: current_team).to_a
-    text = if game_types.empty?
+    game_names = GameType.where(slack_team_id: current_team).pluck(:game_name)
+    text = if game_names.empty?
              "No types of games have been registered for this team yet. Try `/elo register [game]`."
            else
-             "Here are all the registered types of games for this team:\n#{game_types.map { |game_type| "• #{game_type.game_name}" }.join("\n")}"
+             "Here are all the registered types of games for this team:\n#{game_names.map { |name| "• #{name}" }.join("\n")}"
            end
     reply text
   end
