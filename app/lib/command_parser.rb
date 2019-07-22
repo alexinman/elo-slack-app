@@ -34,7 +34,7 @@ class CommandParser
   end
 
   def parse
-    return @parsed if @parse.present?
+    return @parsed if @parsed.present?
     @parsed = {}
     @parsed[:teams] = parse_teams
     @parsed[:players] = determine_players
