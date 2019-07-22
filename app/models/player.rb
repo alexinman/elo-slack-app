@@ -17,11 +17,15 @@ class Player < ActiveRecord::Base
   end
 
   def team_tag
-    slack_user_id.split("-").map { |id| "<#{id}>" }.to_sentence
+    slack_user_id.split('-').map { |id| "<#{id}>" }.to_sentence
   end
 
   def doubles?
     team_size == 2
+  end
+
+  def doubles_individual?
+    doubles? && slack_user_id.split('-').size == 1
   end
 
   def rating_change
@@ -49,8 +53,7 @@ class Player < ActiveRecord::Base
 
   def nemesis
     return @nemesis if defined? @nemesis
-    individual = slack_user_id.split('-').size == 1
-    @nemesis = individual && team_size == 2 ? doubles_individual_nemesis : team_nemesis
+    @nemesis = doubles_individual? ? doubles_individual_nemesis : team_nemesis
   end
 
   def log_game(other_player, logged_by_slack_user_id, result)

@@ -35,8 +35,11 @@ class PlayerViewModel < ApplicationViewModel
 
     def fields(player)
       fields = []
-      fields << field('Rank', LeaderboardViewModel.surrounding_ranks(player).items.join("\n")) if player.team_size == 1
-      fields << field('Average Rating', player.rating) if player.team_size > 1
+      if player.doubles_individual?
+        fields << field('Average Rating', player.rating)
+      else
+        fields << field('Rank', LeaderboardViewModel.surrounding_ranks(player).items.join("\n"))
+      end
       fields << field('Wins', player.number_of_wins, short: true)
       fields << field('Losses', player.number_of_losses, short: true)
       fields << field('Ties', player.number_of_ties, short: true) if player.number_of_ties > 0

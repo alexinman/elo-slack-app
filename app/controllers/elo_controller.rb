@@ -18,7 +18,7 @@ class EloController < ApplicationController
                 "`/elo [@winner] defeated [@loser] at [game]` - Logs a game between these players and updates their ratings accordingly.\n" <<
                     "`/elo [@player1] tied [@player2] at [game]` - Logs a tie game between these players and updates their ratings accordingly.\n" <<
                     "`/elo leaderboard [game]` - Displays the leaderboard for the specified game.\n" <<
-                    "`/elo rating [@player] [game]` - Displays your Elo rating for all types of games you've played. (Optional parameters allow you to filter to a specific game or view someone elses stats.)\n" <<
+                    "`/elo rating [@player] [game]` - Displays your Elo rating for all types of games you've played. (Optional parameters allow you to filter to a specific game or view someone else's stats.)\n" <<
                     "`/elo games` - Lists all registered games for this team. (a.k.a. Valid inputs for [game] in other commands).\n" <<
                     "`/elo register [game]` - Registers this as a type of game that this team plays.\n"
         }
