@@ -1,15 +1,9 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
-  before_filter :check_slack_team_id
   around_filter :error_handling
 
   private
-
-  def check_slack_team_id
-    return if params[:team_id].present?
-    render json: {message: 'missing team_id'}, status: :bad_request
-  end
 
   def reply(text=nil, in_channel: false, attachments: [])
     raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present?

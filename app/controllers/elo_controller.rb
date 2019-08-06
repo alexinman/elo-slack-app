@@ -2,6 +2,7 @@ class EloController < ApplicationController
   before_filter :verify_slack_signature
 
   def elo
+    render json: {message: "missing parameter team_id"}, status: :bad_request and return if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request and return if params[:user_id].blank?
     render json: {message: "missing parameter text"}, status: :bad_request and return if params[:text].nil?
     @parsed = CommandParser.new(params).parse
