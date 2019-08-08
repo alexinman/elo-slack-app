@@ -2,7 +2,7 @@ class CommandParser
   attr_reader :params
 
   USER_ID_REGEX = '<([^\|>]*)[^>]*>'.freeze
-  TEAM_REGEX = "(#{USER_ID_REGEX}(?:\s+and\s+#{USER_ID_REGEX})*)".freeze
+  TEAM_REGEX = "(#{USER_ID_REGEX}(?:[[:space:]]+and[[:space:]]+#{USER_ID_REGEX})*)".freeze
   WIN_TERMS = ['beat', 'defeated', 'conquered', 'won against', 'got the better of', 'vanquished', 'trounced', 'routed',
                'obliterated', 'overpowered', 'overcame', 'overwhelmed', 'overthrew', 'subdued', 'quashed', 'crushed', 
                'thrashed', 'whipped', 'wiped the floor with', 'clobbered', 'owned', 'pwned', 'wrecked'].freeze
@@ -78,11 +78,11 @@ class CommandParser
   end
 
   def parse_action
-    regex = /#{ALL_ACTIONS.map { |a| "(#{a.gsub(/\s+/, '\s+') })" }.join('|')}/i
+    regex = /#{ALL_ACTIONS.map { |a| "(#{a.gsub(/[[:space:]]+/, '[[:space:]]+') })" }.join('|')}/i
     action_match = text.match(regex).to_a.first
     return unless action_match.present?
     text.sub!(action_match, '')
-    action = action_match.downcase.gsub(/\s+/, ' ')
+    action = action_match.downcase.gsub(/[[:space:]]+/, ' ')
     case action
     when *WIN_TERMS
       :win
@@ -98,7 +98,7 @@ class CommandParser
   end
 
   def parse_game_name
-    text.strip.gsub(/\s+/, ' ').downcase.sub(/^at\s+/, '').presence || channel_name
+    text.strip.gsub(/[[:space:]]+/, ' ').downcase.sub(/^at[[:space:]]+/, '').presence || channel_name
   end
 
   def find_game_type
