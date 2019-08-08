@@ -3,6 +3,10 @@ class ApplicationController < ActionController::Base
 
   around_filter :error_handling
 
+  def index
+    render nothing: true
+  end
+
   private
 
   def reply(text=nil, in_channel: false, attachments: [])
