@@ -59,6 +59,7 @@ class Player < ActiveRecord::Base
   def log_game(other_player, logged_by_slack_user_id, result)
     raise ArgumentError, 'other_player is for different game_type' unless self.game_type_id == other_player.game_type_id
     raise ArgumentError, 'other_player is for different team_size' unless self.team_size == other_player.team_size
+    raise ArgumentError, 'other_player is for different slack_team' unless self.slack_team_id == other_player.slack_team_id
     elo_player.versus other_player.elo_player, result: result
     game = Game.create!(logged_by_slack_user_id: logged_by_slack_user_id, player_one: self, player_two: other_player, result: result)
     self.rating = elo_player.rating
@@ -95,7 +96,7 @@ class Player < ActiveRecord::Base
                    GROUP BY opponent_id
                    HAVING count(opponent_id) > 3
                      AND sum(win::integer)::float / count(opponent_id)::float < 0.5
-                   ORDER BY sum(win::integer)::float / count(opponent_id)::float ASC
+                   ORDER BY (sum(win::integer)::float + 1.0) / count(opponent_id)::float ASC, opponent_id
                    LIMIT 1);
     SQL
   end
@@ -125,7 +126,7 @@ class Player < ActiveRecord::Base
       GROUP BY opponent_slack_user_id
       HAVING count(opponent_slack_user_id) > 3
         AND sum(win::integer)::float / count(opponent_slack_user_id)::float < 0.5
-      ORDER BY sum(win::integer)::float / count(opponent_slack_user_id)::float ASC
+      ORDER BY (sum(win::integer)::float + 1.0) / count(opponent_slack_user_id)::float ASC, opponent_slack_user_id
       LIMIT 1;
     SQL
   end
