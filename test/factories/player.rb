@@ -32,6 +32,10 @@ FactoryBot.define do
       slack_user_id { '@PLAYER5-@PLAYER6' }
     end
 
+    trait :with_doubles_p4_user_id do
+      slack_user_id { '@PLAYER7-@PLAYER8' }
+    end
+
     trait :with_game_type do
       id = FactoryBot.create(:game_type, :with_slack_team_id).id
       game_type_id { id }
@@ -53,5 +57,6 @@ FactoryBot.define do
     factory :doubles_player1, traits: [:with_slack_team_id, :with_doubles_p1_user_id, :with_game_type, :doubles]
     factory :doubles_player2, traits: [:with_slack_team_id, :with_doubles_p2_user_id, :with_game_type, :doubles]
     factory :doubles_player3, traits: [:with_slack_team_id, :with_doubles_p3_user_id, :with_game_type, :doubles]
+    factory :doubles_player4, traits: [:with_slack_team_id, :with_doubles_p4_user_id, :with_game_type, :doubles]
   end
 end
