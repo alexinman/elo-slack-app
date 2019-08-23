@@ -41,7 +41,7 @@ class ApplicationViewModel
     end
 
     def sort(rel, options = {})
-      direction = options[:direction].to_s == 'asc' ? :asc : :desc
+      direction = options[:direction].to_s == 'desc' ? :desc : :asc
       sql_order = Array.wrap(sql_order(options)) + [model_class.arel_table[:id]]
       rel.order(*sql_order.map(&direction))
     end

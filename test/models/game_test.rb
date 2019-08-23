@@ -2,15 +2,19 @@ require 'test_helper'
 
 class GameTest < ActiveSupport::TestCase
   context 'GameTest' do
+    setup do
+      @game_type = FactoryBot.create(:game_type, :with_slack_team_id)
+    end
+
     context '#for_slack_user_id' do
       context 'singles' do
         setup do
-          @player1 = FactoryBot.create(:player1)
-          @player2 = FactoryBot.create(:player2)
+          @player1 = FactoryBot.create(:player1, game_type: @game_type)
+          @player2 = FactoryBot.create(:player2, game_type: @game_type)
           @game = FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: @player1, player_two: @player2)
 
-          player3 = FactoryBot.create(:player3)
-          player4 = FactoryBot.create(:player4)
+          player3 = FactoryBot.create(:player3, game_type: @game_type)
+          player4 = FactoryBot.create(:player4, game_type: @game_type)
           FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: player3, player_two: player4)
         end
 
@@ -33,12 +37,12 @@ class GameTest < ActiveSupport::TestCase
 
       context 'doubles' do
         setup do
-          @player1 = FactoryBot.create(:doubles_player1)
-          @player2 = FactoryBot.create(:doubles_player2)
+          @player1 = FactoryBot.create(:doubles_player1, game_type: @game_type)
+          @player2 = FactoryBot.create(:doubles_player2, game_type: @game_type)
           @game = FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: @player1, player_two: @player2)
 
-          player3 = FactoryBot.create(:doubles_player3)
-          player4 = FactoryBot.create(:doubles_player4)
+          player3 = FactoryBot.create(:doubles_player3, game_type: @game_type)
+          player4 = FactoryBot.create(:doubles_player4, game_type: @game_type)
           FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: player3, player_two: player4)
         end
 
@@ -74,9 +78,9 @@ class GameTest < ActiveSupport::TestCase
 
     context '#opponent' do
       setup do
-        @player1 = FactoryBot.create(:player1)
-        @player2 = FactoryBot.create(:player2)
-        @player3 = FactoryBot.create(:player3)
+        @player1 = FactoryBot.create(:player1, game_type: @game_type)
+        @player2 = FactoryBot.create(:player2, game_type: @game_type)
+        @player3 = FactoryBot.create(:player3, game_type: @game_type)
         @game = FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: @player1, player_two: @player2)
       end
 
@@ -104,8 +108,8 @@ class GameTest < ActiveSupport::TestCase
 
     context '#result_for' do
       setup do
-        @player1 = FactoryBot.create(:player1)
-        @player2 = FactoryBot.create(:player2)
+        @player1 = FactoryBot.create(:player1, game_type: @game_type)
+        @player2 = FactoryBot.create(:player2, game_type: @game_type)
       end
 
       context 'player_one wins' do
@@ -170,7 +174,7 @@ class GameTest < ActiveSupport::TestCase
 
       context 'other player' do
         setup do
-          @player3 = FactoryBot.create(:player3)
+          @player3 = FactoryBot.create(:player3, game_type: @game_type)
           @game = FactoryBot.create(:game, :with_slack_team_id, :draw, player_one: @player1, player_two: @player2)
         end
 
@@ -185,9 +189,9 @@ class GameTest < ActiveSupport::TestCase
 
     context '#result_response' do
       setup do
-        @player1 = FactoryBot.create(:player1)
+        @player1 = FactoryBot.create(:player1, game_type: @game_type)
         @player1.rating = 1010
-        @player2 = FactoryBot.create(:player2)
+        @player2 = FactoryBot.create(:player2, game_type: @game_type)
         @player2.rating = 920
       end
 
@@ -230,8 +234,8 @@ class GameTest < ActiveSupport::TestCase
 
     context '#set_extra_columns' do
       setup do
-        @player1 = FactoryBot.create(:player1)
-        @player2 = FactoryBot.create(:player2)
+        @player1 = FactoryBot.create(:player1, game_type: @game_type)
+        @player2 = FactoryBot.create(:player2, game_type: @game_type)
       end
 
       should 'set extra columns' do

@@ -2,12 +2,16 @@ require 'test_helper'
 
 class PlayerTest < ActiveSupport::TestCase
   context 'PlayerTest' do
+    setup do
+      @game_type = FactoryBot.create(:game_type, :with_slack_team_id)
+    end
+
     context '#for_slack_user_id' do
       context 'singles' do
         setup do
-          @player = FactoryBot.create(:player1)
-          FactoryBot.create(:player2)
-          FactoryBot.create(:player3)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
+          FactoryBot.create(:player2, game_type: @game_type)
+          FactoryBot.create(:player3, game_type: @game_type)
         end
 
         should 'return only specified player' do
@@ -19,9 +23,9 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles' do
         setup do
-          @player = FactoryBot.create(:doubles_player1)
-          FactoryBot.create(:doubles_player2)
-          FactoryBot.create(:doubles_player3)
+          @player = FactoryBot.create(:doubles_player1, game_type: @game_type)
+          FactoryBot.create(:doubles_player2, game_type: @game_type)
+          FactoryBot.create(:doubles_player3, game_type: @game_type)
         end
 
         should 'return only specified player' do
@@ -51,8 +55,8 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'saved Player' do
         setup do
-          @player1 = FactoryBot.create(:player1)
-          @player2 = FactoryBot.create(:player2)
+          @player1 = FactoryBot.create(:player1, game_type: @game_type)
+          @player2 = FactoryBot.create(:player2, game_type: @game_type)
         end
 
         context 'no games' do
@@ -177,7 +181,7 @@ class PlayerTest < ActiveSupport::TestCase
 
         context 'game for another player' do
           setup do
-            player3 = FactoryBot.create(:player3)
+            player3 = FactoryBot.create(:player3, game_type: @game_type)
             FactoryBot.create(:game, player_one_id: player3.id, player_two_id: @player2.id, result: 1)
           end
 
@@ -189,8 +193,8 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles player' do
         setup do
-          @doubles_player1 = FactoryBot.create(:doubles_player1)
-          doubles_player2 = FactoryBot.create(:doubles_player2)
+          @doubles_player1 = FactoryBot.create(:doubles_player1, game_type: @game_type)
+          doubles_player2 = FactoryBot.create(:doubles_player2, game_type: @game_type)
           @game = FactoryBot.create(:game, player_one_id: @doubles_player1.id, player_two_id: doubles_player2.id, result: 1)
         end
 
@@ -221,7 +225,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'existing Player' do
         setup do
-          @player = FactoryBot.create(:player1, rating: 571)
+          @player = FactoryBot.create(:player1, game_type: @game_type, rating: 571)
         end
 
         should 'return Elo::Player with Player rating' do
@@ -236,7 +240,7 @@ class PlayerTest < ActiveSupport::TestCase
 
         context 'with games' do
           setup do
-            player2 = FactoryBot.create(:player2)
+            player2 = FactoryBot.create(:player2, game_type: @game_type)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: @player.id, player_two_id: player2.id, result: 1)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: player2.id, player_two_id: @player.id, result: 1)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: @player.id, player_two_id: player2.id, result: 0)
@@ -244,7 +248,7 @@ class PlayerTest < ActiveSupport::TestCase
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: @player.id, player_two_id: player2.id, result: 0.5)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: player2.id, player_two_id: @player.id, result: 0.5)
 
-            player3 = FactoryBot.create(:player3)
+            player3 = FactoryBot.create(:player3, game_type: @game_type)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: player3.id, player_two_id: player2.id, result: 1)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: player2.id, player_two_id: player3.id, result: 1)
             FactoryBot.create(:game, :with_slack_team_id, player_one_id: player3.id, player_two_id: player2.id, result: 0)
@@ -269,7 +273,7 @@ class PlayerTest < ActiveSupport::TestCase
     context '#team_tag' do
       context 'singles' do
         setup do
-          @player = FactoryBot.create(:player1)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
         end
 
         should 'return slack formatted team tag' do
@@ -279,7 +283,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles' do
         setup do
-          @player = FactoryBot.create(:doubles_player1)
+          @player = FactoryBot.create(:doubles_player1, game_type: @game_type)
         end
 
         should 'return slack formatted team tag' do
@@ -290,7 +294,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'triples' do
         setup do
-          @player = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, slack_user_id: '@PLAYER1-@PLAYER2-@PLAYER3', team_size: 3)
+          @player = FactoryBot.create(:player, :with_slack_team_id, game_type: @game_type, slack_user_id: '@PLAYER1-@PLAYER2-@PLAYER3', team_size: 3)
         end
 
         should 'return slack formatted team tag' do
@@ -303,7 +307,7 @@ class PlayerTest < ActiveSupport::TestCase
     context '#doubles?' do
       context 'singles player' do
         setup do
-          @player = FactoryBot.create(:player1)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
         end
 
         should 'return false' do
@@ -313,7 +317,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles player' do
         setup do
-          @player = FactoryBot.create(:doubles_player1)
+          @player = FactoryBot.create(:doubles_player1, game_type: @game_type)
         end
 
         should 'return true' do
@@ -325,7 +329,7 @@ class PlayerTest < ActiveSupport::TestCase
     context '#doubles_individual?' do
       context 'singles player' do
         setup do
-          @player = FactoryBot.create(:player1)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
         end
 
         should 'return false' do
@@ -335,7 +339,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles player' do
         setup do
-          @player = FactoryBot.create(:doubles_player1)
+          @player = FactoryBot.create(:doubles_player1, game_type: @game_type)
         end
 
         should 'return false' do
@@ -345,7 +349,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'doubles individual player' do
         setup do
-          @player = FactoryBot.create(:doubles_player1)
+          @player = FactoryBot.create(:doubles_player1, game_type: @game_type)
           @player.slack_user_id = '@PLAYER1'
         end
 
@@ -368,7 +372,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'with positive change' do
         setup do
-          @player = FactoryBot.create(:player1)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
           @player.rating = @player.rating + 10
         end
 
@@ -379,7 +383,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'with negative change' do
         setup do
-          @player = FactoryBot.create(:player1)
+          @player = FactoryBot.create(:player1, game_type: @game_type)
           @player.rating = @player.rating - 10
         end
 
@@ -391,8 +395,8 @@ class PlayerTest < ActiveSupport::TestCase
 
     context '#number_of_wins' do
       setup do
-        @player = FactoryBot.create(:player1)
-        @other_player = FactoryBot.create(:player2)
+        @player = FactoryBot.create(:player1, game_type: @game_type)
+        @other_player = FactoryBot.create(:player2, game_type: @game_type)
       end
 
       context 'with no games' do
@@ -666,8 +670,8 @@ class PlayerTest < ActiveSupport::TestCase
 
     context '#number_of_losses' do
       setup do
-        @player = FactoryBot.create(:player1)
-        @other_player = FactoryBot.create(:player2)
+        @player = FactoryBot.create(:player1, game_type: @game_type)
+        @other_player = FactoryBot.create(:player2, game_type: @game_type)
       end
 
       context 'with no games' do
@@ -941,8 +945,8 @@ class PlayerTest < ActiveSupport::TestCase
 
     context '#number_of_ties' do
       setup do
-        @player = FactoryBot.create(:player1)
-        @other_player = FactoryBot.create(:player2)
+        @player = FactoryBot.create(:player1, game_type: @game_type)
+        @other_player = FactoryBot.create(:player2, game_type: @game_type)
       end
 
       context 'with no games' do
@@ -1218,9 +1222,9 @@ class PlayerTest < ActiveSupport::TestCase
       [1, 2].each do |team_size|
         context "team_size:#{team_size}" do
           setup do
-            @player = team_size == 1 ? FactoryBot.create(:player1) : FactoryBot.create(:doubles_player1)
-            @player2 = team_size == 1 ? FactoryBot.create(:player2) : FactoryBot.create(:doubles_player2)
-            @player3 = team_size == 1 ? FactoryBot.create(:player3) : FactoryBot.create(:doubles_player3)
+            @player = team_size == 1 ? FactoryBot.create(:player1, game_type: @game_type) : FactoryBot.create(:doubles_player1, game_type: @game_type)
+            @player2 = team_size == 1 ? FactoryBot.create(:player2, game_type: @game_type) : FactoryBot.create(:doubles_player2, game_type: @game_type)
+            @player3 = team_size == 1 ? FactoryBot.create(:player3, game_type: @game_type) : FactoryBot.create(:doubles_player3, game_type: @game_type)
           end
 
           [1, 2].each do |player_num_v_p2|
@@ -1309,12 +1313,12 @@ class PlayerTest < ActiveSupport::TestCase
           @p3_slack_user_id = '@PLAYER3'
           @p4_slack_user_id = '@PLAYER4'
 
-          @p1p2 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p1_slack_user_id}-#{@p2_slack_user_id}")
-          @p1p3 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p1_slack_user_id}-#{@p3_slack_user_id}")
-          @p1p4 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p1_slack_user_id}-#{@p4_slack_user_id}")
-          @p2p3 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p2_slack_user_id}-#{@p3_slack_user_id}")
-          @p2p4 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p2_slack_user_id}-#{@p4_slack_user_id}")
-          @p3p4 = FactoryBot.create(:player, :with_slack_team_id, :with_game_type, :doubles, slack_user_id: "#{@p3_slack_user_id}-#{@p4_slack_user_id}")
+          @p1p2 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p1_slack_user_id}-#{@p2_slack_user_id}")
+          @p1p3 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p1_slack_user_id}-#{@p3_slack_user_id}")
+          @p1p4 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p1_slack_user_id}-#{@p4_slack_user_id}")
+          @p2p3 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p2_slack_user_id}-#{@p3_slack_user_id}")
+          @p2p4 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p2_slack_user_id}-#{@p4_slack_user_id}")
+          @p3p4 = FactoryBot.create(:player, :with_slack_team_id, :doubles, game_type: @game_type, slack_user_id: "#{@p3_slack_user_id}-#{@p4_slack_user_id}")
 
           @player = Player.new(slack_team_id: 'SLACKTEAMID', slack_user_id: @p1_slack_user_id, game_type_id: @p1p2.game_type_id, team_size: 2)
         end
@@ -1416,8 +1420,8 @@ class PlayerTest < ActiveSupport::TestCase
 
     context '#log_game' do
       setup do
-        @player1 = FactoryBot.create(:player1)
-        @player2 = FactoryBot.create(:player2)
+        @player1 = FactoryBot.create(:player1, game_type: @game_type)
+        @player2 = FactoryBot.create(:player2, game_type: @game_type)
         @logger = 'LOGGER'
         @result = 1
       end
@@ -1479,7 +1483,7 @@ class PlayerTest < ActiveSupport::TestCase
 
       context 'P2 is for another team_size' do
         setup do
-          @player2 = FactoryBot.create(:doubles_player2)
+          @player2 = FactoryBot.create(:doubles_player2, game_type: @game_type)
         end
 
         should 'raise ArgumentError' do
