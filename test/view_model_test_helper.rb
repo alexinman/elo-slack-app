@@ -1,9 +1,9 @@
-def setup_basic_view_model_tests(sort_orders)
+def setup_basic_view_model_tests(sort_orders, optional_parameters)
   context 'basic view model tests' do
     context '#list' do
       setup do
-        @items = 15.times.map { FactoryBot.create(model_sym, :with_slack_team_id) }.sort_by(&:created_at)
-        5.times { FactoryBot.create(model_sym, slack_team_id: 'DIFFERENT') }
+        @items = 15.times.map { create_object }.sort_by(&:created_at)
+        5.times { create_object_different_team }
       end
 
       context 'with required parameters' do
@@ -232,6 +232,27 @@ def setup_basic_view_model_tests(sort_orders)
             end
           end
         end
+
+        optional_parameters.each do |parameter|
+          context "optional_parameter:#{parameter}" do
+            setup do
+              update_values(parameter)
+            end
+
+            should 'return only item matching parameter' do
+              item = @items.first
+              expected = {
+                  page: 1,
+                  per_page: 10,
+                  page_count: 1,
+                  item_count: 1,
+                  items: [summary(item)]
+              }
+              parameters = required_parameters.merge({parameter => item.send(parameter)})
+              assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access
+            end
+          end
+        end
       end
 
       context 'without required parameters' do
@@ -250,7 +271,7 @@ def setup_basic_view_model_tests(sort_orders)
 
     context '#details_for' do
       setup do
-        @item = FactoryBot.create(model_sym, :with_slack_team_id)
+        @item = create_object
       end
 
       should 'return details' do
@@ -260,9 +281,9 @@ def setup_basic_view_model_tests(sort_orders)
   end
 end
 
-def update_values(order, same_value: false)
+def update_values(attribute, same_value: false)
   @items.shuffle.each_with_index do |item, index|
-    type = model.columns_hash[order.to_s].type
+    type = model.columns_hash[attribute.to_s].type
     index = 0 if same_value
     value = case type
             when :sting
@@ -272,7 +293,7 @@ def update_values(order, same_value: false)
             else
               index
             end
-    item.update_attribute(order, value)
+    item.update_attribute(attribute, value)
   end
 end
 
@@ -300,4 +321,16 @@ end
 
 def model_sym
   model.name.underscore.to_sym
+end
+
+def basic_object_attributes(slack_team_id = nil)
+  {slack_team_id: slack_team_id || 'SLACKTEAMID'}
+end
+
+def create_object
+  FactoryBot.create(model_sym, basic_object_attributes)
+end
+
+def create_object_different_team
+  FactoryBot.create(model_sym, basic_object_attributes('DIFFERENT'))
 end
