@@ -44,6 +44,14 @@ FactoryBot.define do
       team_size { 2 }
     end
 
+    trait :with_singles_user_id do
+      sequence(:slack_user_id) { |n| "@PLAYER#{n}" }
+    end
+
+    trait :with_doubles_user_id do
+      sequence(:slack_user_id) { |n| "@PLAYER#{n*2}-@PLAYER#{n*2+1}" }
+    end
+
     factory :player1, traits: [:with_slack_team_id, :with_p1_user_id, :singles]
     factory :player2, traits: [:with_slack_team_id, :with_p2_user_id, :singles]
     factory :player3, traits: [:with_slack_team_id, :with_p3_user_id, :singles]

@@ -36,7 +36,7 @@ module Minitest::Assertions
 
   def assert_array_equivalent(expected, actual, message=nil, options={})
     assert actual.instance_of?(Array), "Expected #{actual.inspect} to be an Array, but was #{actual.class.inspect}. #{message}"
-    assert_equal expected.size, actual.size, "Expected array sizes to be equal. Expected #{expected.size}, but was #{actual.size}. #{message}"
+    assert_equal expected.size, actual.size, "Expected array sizes to be equal. #{message}"
     expected.count.times do |i|
       assert_equivalent expected[i], actual[i], "#{message}[#{i}]", options
     end

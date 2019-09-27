@@ -33,6 +33,7 @@ gem 'rack-timeout'
 group :test do
   gem 'shoulda-context'
   gem 'shoulda-matchers'
+  gem 'timecop'
 end
 
 group :development, :test do
