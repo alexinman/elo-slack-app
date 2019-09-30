@@ -15,7 +15,7 @@ class PlayerViewModel < ApplicationViewModel
       rel = rel.where(team_size: options[:team_size]) if options[:team_size].present?
 
       select_statement = Player.send(:sanitize_sql, ['max(players.id) as id, max(players.slack_team_id) as slack_team_id, ? as slack_user_id, players.game_type_id, players.team_size, avg(players.rating) as rating', options[:slack_user_id]])
-      rel = rel.group(:game_type_id, :team_size).select(select_statement)
+      rel = rel.group(:game_type_id, :team_size).select(select_statement).order('1')
       data = paginate(rel, per_page: 20, &method(:statistics_summary))
       new(data)
     end

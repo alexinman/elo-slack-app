@@ -27,7 +27,7 @@ class GameViewModelTest < ActiveSupport::TestCase
                   per_page: 10,
                   page_count: 1,
                   item_count: 1,
-                  items: [@game.attributes.as_json]
+                  items: [summary(@game)]
               }
               parameters = required_parameters.merge({slack_user_id: @game.player_one.slack_user_id})
               assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access
@@ -41,7 +41,7 @@ class GameViewModelTest < ActiveSupport::TestCase
                   per_page: 10,
                   page_count: 1,
                   item_count: 1,
-                  items: [@game.attributes.as_json]
+                  items: [summary(@game)]
               }
               parameters = required_parameters.merge({slack_user_id: @game.player_two.slack_user_id})
               assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access
@@ -57,7 +57,7 @@ class GameViewModelTest < ActiveSupport::TestCase
                   per_page: 10,
                   page_count: 1,
                   item_count: 1,
-                  items: [@doubles_game.attributes.as_json]
+                  items: [summary(@doubles_game)]
               }
               parameters = required_parameters.merge({slack_user_id: 'PLAYER3'})
               assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access
@@ -71,7 +71,7 @@ class GameViewModelTest < ActiveSupport::TestCase
                   per_page: 10,
                   page_count: 1,
                   item_count: 1,
-                  items: [@doubles_game.attributes.as_json]
+                  items: [summary(@doubles_game)]
               }
               parameters = required_parameters.merge({slack_user_id: 'PLAYER5'})
               assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access
@@ -99,7 +99,7 @@ class GameViewModelTest < ActiveSupport::TestCase
               per_page: 10,
               page_count: 1,
               item_count: 1,
-              items: [@game1.attributes.as_json]
+              items: [summary(@game1)]
           }
           parameters = required_parameters.merge({game_type_id: @game_type1.id})
           assert_equivalent expected, view_model.list(parameters).as_json.with_indifferent_access

@@ -40,6 +40,20 @@ class PlayerTest < ActiveSupport::TestCase
           assert_equal @player.id, result.take.id
         end
       end
+
+      context 'no slack_user_id provided' do
+        setup do
+          FactoryBot.create(:player1, game_type: @game_type)
+        end
+
+        should 'return nothing' do
+          result = Player.for_slack_user_id(nil)
+          assert_equal 0, result.count
+
+          result = Player.for_slack_user_id('')
+          assert_equal 0, result.count
+        end
+      end
     end
 
     context '#games' do

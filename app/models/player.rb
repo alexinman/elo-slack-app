@@ -4,7 +4,7 @@ class Player < ActiveRecord::Base
   after_initialize :store_current_rating
 
   scope :for_slack_user_id, ->(slack_user_id) do
-    where('slack_user_id ilike ?', "%#{slack_user_id}%")
+    slack_user_id.present? ? where('slack_user_id ilike ?', "%#{slack_user_id}%") : none
   end
 
   def games

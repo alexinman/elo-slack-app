@@ -5,6 +5,8 @@ module Minitest::Assertions
       assert_hash_equivalent(expected, actual, message, options)
     when Array
       assert_array_equivalent(expected, actual, message, options)
+    when Regexp
+      assert_match(expected, actual, message)
     when :present
       assert actual.present?, "Expected #{actual.inspect} to be present. #{message}"
     when :any
