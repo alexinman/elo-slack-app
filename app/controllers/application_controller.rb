@@ -1,15 +1,13 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
-  before_filter :check_slack_team_id
   around_filter :error_handling
 
-  private
-
-  def check_slack_team_id
-    return if params[:team_id].present?
-    render json: {message: 'missing team_id'}, status: :bad_request
+  def index
+    render nothing: true
   end
+
+  private
 
   def reply(text=nil, in_channel: false, attachments: [])
     raise "double reply. original messages:\n#{@response[:text]}\n#{text}" if @response.present?
@@ -30,18 +28,11 @@ class ApplicationController < ActionController::Base
 
   def verify_slack_signature
     return if ENV['SKIP_SLACK_SIGNING'] # for easier dev debugging
-    version_number = 'v0' # always v0 for now
-    timestamp = request.headers['X-Slack-Request-Timestamp']
-    raw_body = request.body.read
-    sig_basestring = [version_number, timestamp, raw_body].join(':')
 
-    signing_secret = ENV['SLACK_SIGNING_SECRET'].to_s
-    digest = OpenSSL::Digest::SHA256.new
-    hex_hash = OpenSSL::HMAC.hexdigest(digest, signing_secret, sig_basestring)
-    computed_signature = [version_number, hex_hash].join('=')
+    computed_signature = SlackHelper.signature(timestamp: request.headers['X-Slack-Request-Timestamp'], raw_body: request.body.read)
     slack_signature = request.headers['X-Slack-Signature']
 
-    render nothing: true, status: :unauthorized if computed_signature != slack_signature
+    render nothing: true, status: :unauthorized unless computed_signature == slack_signature
   end
 
   def error_handling

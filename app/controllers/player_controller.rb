@@ -1,6 +1,5 @@
 class PlayerController < ApplicationController
   def players
-    results = PlayerViewModel.list(params)
-    render json: results, status: :ok
+    render json: PlayerViewModel.list(params), status: :ok
   end
 end

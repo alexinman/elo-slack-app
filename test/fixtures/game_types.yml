@@ -1,9 +1,0 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-one:
-  slack_team_id: MyText
-  game_type: MyText
-
-two:
-  slack_team_id: MyText
-  game_type: MyText

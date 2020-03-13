@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get '/', :controller => 'application', :action => 'index'
+
   post '/elo', :controller => 'elo', :action => 'elo'
 
   scope :path => 'api', :controller => 'player' do

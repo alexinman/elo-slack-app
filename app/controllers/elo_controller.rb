@@ -2,6 +2,7 @@ class EloController < ApplicationController
   before_filter :verify_slack_signature
 
   def elo
+    render json: {message: "missing parameter team_id"}, status: :bad_request and return if params[:team_id].blank?
     render json: {message: "missing parameter user_id"}, status: :bad_request and return if params[:user_id].blank?
     render json: {message: "missing parameter text"}, status: :bad_request and return if params[:text].nil?
     @parsed = CommandParser.new(params).parse
@@ -39,10 +40,11 @@ class EloController < ApplicationController
 
   def stats
     results = PlayerViewModel.statistics(slack_team_id: current_team, slack_user_id: @parsed[:teams].first, game_type_id: @parsed[:game_type].try(:id)).items
+    reply attachments: results and return unless results.empty?
+
     tag = @parsed[:teams].first.split('-').map { |id| id == current_user ? 'You' : "<#{id}>" }.sort.reverse.to_sentence
     verb_conjugation = tag.include?('You') || tag.include?('and') ? "haven't" : "hasn't"
-    reply "#{tag} #{verb_conjugation} played any ELO rated games #{@parsed[:game_type].present? ? "of #{@parsed[:game_type].game_name} " : ""}yet." and return if results.empty?
-    reply attachments: results
+    reply "#{tag} #{verb_conjugation} played any ELO rated games #{@parsed[:game_type].present? ? "of #{@parsed[:game_type].game_name} " : ""}yet."
   end
 
   def register

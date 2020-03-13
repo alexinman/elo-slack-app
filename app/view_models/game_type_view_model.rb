@@ -15,8 +15,6 @@ class GameTypeViewModel < ApplicationViewModel
       case options[:order].to_s
       when 'game_name'
         model_class.arel_table[:game_name]
-      when 'created_at'
-        model_class.arel_table[:created_at]
       else
         model_class.arel_table[:created_at]
       end
