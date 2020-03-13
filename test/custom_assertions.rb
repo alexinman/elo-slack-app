@@ -47,4 +47,12 @@ module Minitest::Assertions
       assert_equivalent expected[i], actual[i], opts
     end
   end
+
+  def assert_ok
+    assert_response :ok, JSON.parse(response.body)
+  end
+
+  def assert_json_response(expected, options={})
+    assert_hash_equivalent(expected, JSON.parse(response.body), options)
+  end
 end
