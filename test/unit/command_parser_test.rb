@@ -431,5 +431,1004 @@ class CommandParserTest < ActiveSupport::TestCase
         end
       end
     end
+
+    context 'command:win' do
+      CommandParser::WIN_TERMS.each do |term|
+        context "keyword:#{term.inspect}" do
+          context 'singles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@player1.team_tag} #{term} #{@player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@player1.slack_user_id, @player2.slack_user_id],
+                    players: [@player1.slack_user_id, @player2.slack_user_id],
+                    team_size: 1,
+                    action: :win,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :win,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroupe'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'doubles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :win,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :win,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'uneven' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :win,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :win,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :win,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    context 'command:loss' do
+      CommandParser::LOSS_TERMS.each do |term|
+        context "keyword:#{term.inspect}" do
+          context 'singles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@player1.team_tag} #{term} #{@player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@player1.slack_user_id, @player2.slack_user_id],
+                    players: [@player1.slack_user_id, @player2.slack_user_id],
+                    team_size: 1,
+                    action: :loss,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :loss,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroupe'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'doubles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :loss,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :loss,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'uneven' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :loss,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :loss,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :loss,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    context 'command:draw' do
+      CommandParser::DRAW_TERMS.each do |term|
+        context "keyword:#{term.inspect}" do
+          context 'singles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@player1.team_tag} #{term} #{@player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@player1.slack_user_id, @player2.slack_user_id],
+                    players: [@player1.slack_user_id, @player2.slack_user_id],
+                    team_size: 1,
+                    action: :draw,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :draw,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroupe'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @player2.slack_user_id],
+                      players: [@player1.slack_user_id, @player2.slack_user_id],
+                      team_size: 1,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'doubles' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :draw,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :draw,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: 2,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+
+          context 'uneven' do
+            context 'w/ specified game' do
+              should 'parse command correctly' do
+                params = {
+                    text: "#{@doubles_player1.team_tag} #{term} #{@doubles_player2.team_tag} at #{@game_type.game_name}",
+                    user_id: 'CURRENTUSER',
+                    team_id: 'SLACKTEAMID',
+                    channel_name: 'random'
+                }
+                expected = {
+                    teams: [@doubles_player1.slack_user_id, @doubles_player2.slack_user_id],
+                    players: @doubles_player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                    team_size: 2,
+                    action: :draw,
+                    game_name: @game_type.game_name,
+                    game_type: @game_type
+                }
+                parsed = CommandParser.new(params).parse
+                assert_equivalent expected, parsed
+              end
+            end
+
+            context 'w/o specified game' do
+              context 'in game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: @game_type.game_name
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :draw,
+                      game_name: @game_type.game_name,
+                      game_type: @game_type
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed
+                end
+              end
+
+              context 'in non-game channel' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'random'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in directmessage' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'directmessage'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+
+              context 'in privategroup' do
+                should 'parse command correctly' do
+                  params = {
+                      text: "#{@player1.team_tag} #{term} #{@doubles_player2.team_tag}",
+                      user_id: 'CURRENTUSER',
+                      team_id: 'SLACKTEAMID',
+                      channel_name: 'privategroup'
+                  }
+                  expected = {
+                      teams: [@player1.slack_user_id, @doubles_player2.slack_user_id],
+                      players: @player1.slack_user_id.split('-') + @doubles_player2.slack_user_id.split('-'),
+                      team_size: :uneven,
+                      action: :draw,
+                      game_name: nil,
+                      game_type: nil
+                  }
+                  parsed = CommandParser.new(params).parse
+                  assert_equivalent expected, parsed, allow_nil: true
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 end
