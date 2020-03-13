@@ -1,11 +1,9 @@
 class GameController < ApplicationController
   def games
-    results = GameViewModel.list(params)
-    render json: results, status: :ok
+    render json: GameViewModel.list(params), status: :ok
   end
 
   def types
-    results = GameTypeViewModel.list(params)
-    render json: results, status: :ok
+    render json: GameTypeViewModel.list(params), status: :ok
   end
 end

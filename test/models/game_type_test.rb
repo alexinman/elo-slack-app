@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class GameTypeTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  context 'GameTypeTest' do
+  #   No methods, no tests ¯\_(ツ)_/¯
+  end
 end
