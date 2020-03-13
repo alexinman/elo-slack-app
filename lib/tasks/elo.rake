@@ -9,5 +9,6 @@ namespace :elo do
     elo_players.each do |id, elo_player|
       Player.where(id: id).update_all(rating: elo_player.rating)
     end
+    Player.joins('LEFT OUTER JOIN games ON games.player_one_id = players.id OR games.player_two_id = players.id').where(games: {id: nil}).delete_all
   end
 end
