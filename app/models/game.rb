@@ -3,6 +3,8 @@ class Game < ActiveRecord::Base
   belongs_to :player_two, class_name: 'Player'
   belongs_to :game_type
 
+  validates_presence_of :result
+
   before_create :set_extra_columns
 
   scope :for_slack_user_id, ->(slack_user_id) do
