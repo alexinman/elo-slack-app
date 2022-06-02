@@ -78,7 +78,7 @@ class EloController < ApplicationController
 
   def game(result)
     reply "2 on 1 isn't very fair :dusty_stick:" and return if @parsed[:team_size] == :uneven
-    reply "A third-party witness must enter the game for it to count." and return if @parsed[:players].include? current_user
+    # reply "A third-party witness must enter the game for it to count." and return if @parsed[:players].include? current_user
     reply ":areyoukiddingme:" and return if (@parsed[:players] & %w(@USLACKBOT !channel !here)).present?
     reply "Am I seeing double or did you enter the same person multiple times? :twinsparrot:" and return if @parsed[:players].size != @parsed[:team_size] * 2
     return invalid_game_name unless @parsed[:game_type].present?

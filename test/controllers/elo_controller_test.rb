@@ -1250,16 +1250,16 @@ class EloControllerTest < ActionController::TestCase
               end
             end
 
-            context 'no third-party' do
-              setup do
-                @params[:text] = "<@CURRENTUSER> beat <@PLAYER1>"
-              end
+            # context 'no third-party' do
+            #   setup do
+            #     @params[:text] = "<@CURRENTUSER> beat <@PLAYER1>"
+            #   end
 
-              should 'return third party message' do
-                assert_no_difference('Game.count', &method(:post_elo))
-                assert_simple_response "A third-party witness must enter the game for it to count."
-              end
-            end
+            #   should 'return third party message' do
+            #     assert_no_difference('Game.count', &method(:post_elo))
+            #     assert_simple_response "A third-party witness must enter the game for it to count."
+            #   end
+            # end
 
             context 'areyoukiddingme' do
               %w(@USLACKBOT !channel !here).each do |player1|
