@@ -1,0 +1,22 @@
+defaults: &defaults
+  app_name: Elo Slack App
+
+development:
+  <<: *defaults
+  base_domain: localhost:3000
+  root_url: http://localhost:3000
+
+test:
+  <<: *defaults
+  base_domain: localhost:3000
+  root_url: http://localhost:3000
+
+staging:
+  <<: *defaults
+  base_domain: elo-slack-app-test.herokuapp.com/
+  root_url: https://elo-slack-app-test.herokuapp.com/
+
+production:
+  <<: *defaults
+  base_domain: elo-slack-app.herokuapp.com/
+  root_url: https://elo-slack-app.herokuapp.com/
