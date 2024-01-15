@@ -174,7 +174,7 @@ GEM
       railties (>= 6.0.0)
     strscan (3.0.4)
     thor (1.2.1)
-    timecop (0.9.5)
+    timecop (0.9.8)
     timeout (0.3.0)
     turbo-rails (1.1.1)
       actionpack (>= 6.0.0)
