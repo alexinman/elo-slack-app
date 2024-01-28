@@ -193,7 +193,7 @@ GEM
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)
     shoulda-context (2.0.0)
-    shoulda-matchers (5.1.0)
+    shoulda-matchers (6.1.0)
       activesupport (>= 5.2.0)
     sprockets (4.1.1)
       concurrent-ruby (~> 1.0)
