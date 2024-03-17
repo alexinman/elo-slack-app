@@ -82,7 +82,7 @@ GEM
       mutex_m
       tzinfo (~> 2.0)
     base64 (0.2.0)
-    bigdecimal (3.1.6)
+    bigdecimal (3.1.7)
     bindex (0.8.1)
     bootsnap (1.18.3)
       msgpack (~> 1.2)
@@ -124,7 +124,7 @@ GEM
       net-smtp
     marcel (1.0.2)
     mini_mime (1.1.5)
-    minitest (5.22.2)
+    minitest (5.22.3)
     msgpack (1.7.2)
     mutex_m (0.2.0)
     net-imap (0.4.10)
@@ -194,7 +194,7 @@ GEM
     reline (0.4.3)
       io-console (~> 0.5)
     shoulda-context (2.0.0)
-    shoulda-matchers (6.1.0)
+    shoulda-matchers (6.2.0)
       activesupport (>= 5.2.0)
     sprockets (4.1.1)
       concurrent-ruby (~> 1.0)
