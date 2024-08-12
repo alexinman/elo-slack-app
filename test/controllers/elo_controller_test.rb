@@ -293,7 +293,7 @@ class EloControllerTest < ActionController::TestCase
                 should 'create GameType for team' do
                   assert_difference('GameType.count') do
                     post_elo
-                    assert GameType.where(slack_team_id: 'SLACKTEAMID', game_name: 'pingpong').exists?
+                    assert_predicate GameType.where(slack_team_id: 'SLACKTEAMID', game_name: 'pingpong'), :exists?
                   end
                 end
               end
@@ -361,7 +361,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 1).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 1), :exists?
                         end
                       end
 
@@ -395,7 +395,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0), :exists?
                         end
                       end
 
@@ -429,7 +429,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0.5), :exists?
                         end
                       end
 
@@ -465,7 +465,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 1).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 1), :exists?
                         end
                       end
 
@@ -501,7 +501,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 0).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 0), :exists?
                         end
                       end
 
@@ -537,7 +537,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 0.5), :exists?
                         end
                       end
 
@@ -581,7 +581,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 1).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 1), :exists?
                         end
                       end
 
@@ -617,7 +617,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 0).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 0), :exists?
                         end
                       end
 
@@ -653,7 +653,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 0.5), :exists?
                         end
                       end
 
@@ -691,7 +691,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 1).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 1), :exists?
                         end
                       end
 
@@ -729,7 +729,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 0).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 0), :exists?
                         end
                       end
 
@@ -767,7 +767,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 0.5).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 0.5), :exists?
                         end
                       end
 
@@ -809,7 +809,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 1).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 1), :exists?
                         end
                       end
 
@@ -843,7 +843,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0), :exists?
                         end
                       end
 
@@ -877,7 +877,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, player_two_id: @player2.id, result: 0.5), :exists?
                         end
                       end
 
@@ -913,7 +913,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 1).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 1), :exists?
                         end
                       end
 
@@ -949,7 +949,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 0).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 0), :exists?
                         end
                       end
 
@@ -985,7 +985,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_one_id: @player1.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_one_id: @player1.id, result: 0.5), :exists?
                         end
                       end
 
@@ -1029,7 +1029,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 1).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 1), :exists?
                         end
                       end
 
@@ -1065,7 +1065,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 0).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 0), :exists?
                         end
                       end
 
@@ -1101,7 +1101,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(player_two_id: @player2.id, result: 0.5).exists?
+                          assert_predicate Game.where(player_two_id: @player2.id, result: 0.5), :exists?
                         end
                       end
 
@@ -1139,7 +1139,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 1).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 1), :exists?
                         end
                       end
 
@@ -1177,7 +1177,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 0).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 0), :exists?
                         end
                       end
 
@@ -1215,7 +1215,7 @@ class EloControllerTest < ActionController::TestCase
                       should 'log game' do
                         assert_difference('Game.count') do
                           post_elo
-                          assert Game.where(slack_team_id: 'SLACKTEAMID', result: 0.5).exists?
+                          assert_predicate Game.where(slack_team_id: 'SLACKTEAMID', result: 0.5), :exists?
                         end
                       end
 
@@ -1364,7 +1364,6 @@ class EloControllerTest < ActionController::TestCase
   end
 
   def expected_response(text: nil, response_type: 'ephemeral', attachments: [])
-    assert_ok
     {
         response_type: response_type,
         text: text,

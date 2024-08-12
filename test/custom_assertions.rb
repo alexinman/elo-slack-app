@@ -48,11 +48,12 @@ module Minitest::Assertions
     end
   end
 
-  def assert_ok
-    assert_response :ok, JSON.parse(response.body)
+  def assert_json_response(expected, options={})
+    assert_response :ok, json_response
+    assert_hash_equivalent(expected, json_response, options)
   end
 
-  def assert_json_response(expected, options={})
-    assert_hash_equivalent(expected, JSON.parse(response.body), options)
+  def json_response
+    @json_response ||= JSON.parse(response.body) rescue nil
   end
 end

@@ -38,11 +38,6 @@ class PlayerControllerTest < ActionController::TestCase
               @params.merge!({team_size: 1})
             end
 
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -56,11 +51,6 @@ class PlayerControllerTest < ActionController::TestCase
           end
 
           context 'w/o team_size' do
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -80,11 +70,6 @@ class PlayerControllerTest < ActionController::TestCase
               @params.merge!({team_size: 1})
             end
 
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -98,11 +83,6 @@ class PlayerControllerTest < ActionController::TestCase
           end
 
           context 'w/o team_size' do
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -128,11 +108,6 @@ class PlayerControllerTest < ActionController::TestCase
               @params.merge!({team_size: 1})
             end
 
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -146,11 +121,6 @@ class PlayerControllerTest < ActionController::TestCase
           end
 
           context 'w/o team_size' do
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -170,11 +140,6 @@ class PlayerControllerTest < ActionController::TestCase
               @params.merge!({team_size: 1})
             end
 
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -188,11 +153,6 @@ class PlayerControllerTest < ActionController::TestCase
           end
 
           context 'w/o team_size' do
-            should 'be ok' do
-              get_players
-              assert_ok
-            end
-
             should 'return correct players' do
               get_players
               assert_json_response({
@@ -209,11 +169,6 @@ class PlayerControllerTest < ActionController::TestCase
     end
 
     context 'w/o slack_team_id' do
-      should 'be ok' do
-        get_players
-        assert_ok
-      end
-
       should 'return no players' do
         get_players
         assert_json_response({

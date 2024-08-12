@@ -64,11 +64,6 @@ class GameControllerTest < ActionController::TestCase
                 @params.merge!(team_size: 1)
               end
 
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -82,11 +77,6 @@ class GameControllerTest < ActionController::TestCase
             end
 
             context 'w/o team_size' do
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -106,11 +96,6 @@ class GameControllerTest < ActionController::TestCase
                 @params.merge!(team_size: 1)
               end
 
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -124,11 +109,6 @@ class GameControllerTest < ActionController::TestCase
             end
 
             context 'w/o team_size' do
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -154,11 +134,6 @@ class GameControllerTest < ActionController::TestCase
                 @params.merge!(team_size: 1)
               end
 
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -172,11 +147,6 @@ class GameControllerTest < ActionController::TestCase
             end
 
             context 'w/o team_size' do
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -196,11 +166,6 @@ class GameControllerTest < ActionController::TestCase
                 @params.merge!(team_size: 1)
               end
 
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -214,11 +179,6 @@ class GameControllerTest < ActionController::TestCase
             end
 
             context 'w/o team_size' do
-              should 'return ok' do
-                get_games
-                assert_ok
-              end
-
               should 'return matching games' do
                 get_games
                 assert_json_response({
@@ -237,7 +197,6 @@ class GameControllerTest < ActionController::TestCase
       context 'w/o slack_team_id' do
         should 'return no results' do
           get_games
-          assert_ok
           assert_json_response({
                                    'page' => 1,
                                    'per_page' => 10,
@@ -263,7 +222,6 @@ class GameControllerTest < ActionController::TestCase
 
         should 'return game types' do
           get_types
-          assert_ok
           assert_json_response({
                                    'page' => 1,
                                    'per_page' => 10,
@@ -277,7 +235,6 @@ class GameControllerTest < ActionController::TestCase
       context 'w/o slack_team_id' do
         should 'return empty list' do
           get_types
-          assert_ok
           assert_json_response({
                                    'page' => 1,
                                    'per_page' => 10,
