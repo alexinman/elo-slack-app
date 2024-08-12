@@ -29,10 +29,11 @@ class ApplicationController < ActionController::Base
   def verify_slack_signature
     return if ENV['SKIP_SLACK_SIGNING'] # for easier dev debugging
 
-    computed_signature = SlackHelper.signature(timestamp: request.headers['X-Slack-Request-Timestamp'], raw_body: request.body.read)
+    raw_body = params.as_json.except("action", "controller").to_query
+    computed_signature = SlackHelper.signature(timestamp: request.headers['X-Slack-Request-Timestamp'], raw_body:)
     slack_signature = request.headers['X-Slack-Signature']
 
-    head :unauthorized unless computed_signature == slack_signature
+    render json: {text: "Could not verify slack signature."}, status: :unauthorized unless computed_signature == slack_signature
   end
 
   def error_handling
